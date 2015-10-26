@@ -21,7 +21,7 @@ namespace Tests
             foreach (var pair in testData)
             {
                 conv.Regex = pair.Key;
-                Assert.AreEqual(pair.Value, conv.Postfix());
+                Assert.AreEqual(pair.Value, conv.Postfix);
             }
         }
     }

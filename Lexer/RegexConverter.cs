@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 
 namespace Lexer
@@ -17,8 +15,30 @@ namespace Lexer
             };
         }
 
+        private string _regex;
+        public string Regex
+        {
+            get { return _regex; }
+            set
+            {
+                if (_regex != value)
+                {
+                    _regex = value;
+                    _postfix = string.Empty;
+                }
+            }
+        }
 
-        public string Regex { get; set; }
+        private string _postfix;
+        public string Postfix
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_postfix))
+                    _postfix = ToPostfix();
+                return _postfix;
+            }
+        }
 
         private static int Precedence(char c)
         {
@@ -27,12 +47,12 @@ namespace Lexer
             return 6;
         }
 
-        public string Postfix()
+        private string ToPostfix()
         {
-            var stack = new Stack<char>(Regex.Length);
-            var postfix = new StringBuilder(Regex.Length);
+            var stack = new Stack<char>(_regex.Length);
+            var postfix = new StringBuilder(_regex.Length);
 
-            foreach (char c in Regex)
+            foreach (char c in _regex)
             {
                 switch (c)
                 {
