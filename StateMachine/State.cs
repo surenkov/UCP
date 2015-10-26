@@ -2,7 +2,7 @@
 
 namespace StateMachine
 {
-    public class State : IEquatable<State>
+    public class State
     {
         private static ulong _idGen = 0;
 
@@ -42,9 +42,9 @@ namespace StateMachine
             Name = other.Name;
         }
 
-        public bool Equals(State other)
+        public override bool Equals(object other)
         {
-            return Id == other.Id;
+            return Id == (other as State)?.Id;
         }
 
         public override int GetHashCode()

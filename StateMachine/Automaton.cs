@@ -8,20 +8,28 @@ namespace StateMachine
 
     public abstract class Automaton<Event>
     {
+        private State _start;
         protected States _states;
-
         protected HashSet<Event> _events;
 
-        public State Start { get; protected set; }
+        public State Start
+        {
+            get { return _start; }
+            set
+            {
+                _states.Add(_start = value);
+                _start.Start = true;
+            }
+        }
 
-        public State Last { get; protected set; }
+        public State LastAdded { get; protected set; }
 
         public Automaton()
         {
             _states = new HashSet<State>();
             _events = new HashSet<Event>();
 
-            _states.Add(Last = Start = new State { Start = true });
+            _states.Add(LastAdded = Start = new State());
         }
 
         public virtual void AddTransition(State from, State to, Event e)
@@ -29,7 +37,7 @@ namespace StateMachine
             if (!_states.Contains(from))
                 throw new StateNotFoundException();
 
-            _states.Add(Last = to);
+            if (_states.Add(to)) LastAdded = to;
             _events.Add(e);
         }
 
