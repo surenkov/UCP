@@ -8,7 +8,7 @@ namespace StateMachine
 
     public abstract class Automaton<Event>
     {
-        private State _start;
+        protected State _start;
         protected States _states;
         protected HashSet<Event> _events;
 
@@ -56,7 +56,7 @@ namespace StateMachine
         public DFA() : base()
         {
             _table = new Dictionary<KeyValuePair<State, Event>, State>();
-            Current = Start;
+            Current = _start;
         }
 
         public override void AddTransition(State from, State to, Event e)
@@ -78,14 +78,14 @@ namespace StateMachine
     {
         private Dictionary<KeyValuePair<State, Event>, States> _table;
 
-        public static Event Epsilon { get; } = default(Event);
+        public static readonly Event Epsilon = default(Event);
 
         public States Current { get; private set; }
 
         public NFA() : base()
         {
             _table = new Dictionary<KeyValuePair<State, Event>, States>();
-            Current = new States { Start };
+            Current = new States { _start };
             _events.Add(Epsilon);
         }
 
@@ -104,7 +104,7 @@ namespace StateMachine
             var used = new Dictionary<States, State>();
             var q = new Queue<States>();
 
-            var st = transitStates(Epsilon, new States { Start });
+            var st = transitStates(Epsilon, new States { _start });
             used[st] = a.Start;
             q.Enqueue(st);
 
@@ -115,7 +115,7 @@ namespace StateMachine
                 {
                     q.Enqueue(st = transitStates(e, top));
                     var final = st.FirstOrDefault((s) => s.Final);
-                    var newState = new State(final);
+                    var newState = final != null ? new State(final) : new State();
                     used[st] = newState;
                     a.AddTransition(used[top], newState, e);
                 }
@@ -125,7 +125,8 @@ namespace StateMachine
 
         private States transitStates(Event e, States st)
         {
-            States tmp = new States(), res = new States();
+            States tmp = new States(),
+                res = new States();
             foreach (var s in st)
             {
                 _table.TryGetValue(new KeyValuePair<State, Event>(s, e), out tmp);
@@ -139,11 +140,11 @@ namespace StateMachine
             var state = new States();
             foreach (var s in Current)
             {
-                States set;
-                _table.TryGetValue(new KeyValuePair<State, Event>(s, e), out set);
-                state.UnionWith(set);
-                _table.TryGetValue(new KeyValuePair<State, Event>(s, Epsilon), out set);
-                state.UnionWith(set);
+                States set = new States();
+                if (_table.TryGetValue(new KeyValuePair<State, Event>(s, e), out set))
+                    state.UnionWith(set);
+                if (_table.TryGetValue(new KeyValuePair<State, Event>(s, Epsilon), out set))
+                    state.UnionWith(set);
             }
 
             if (state.Count == 0)
