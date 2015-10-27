@@ -1,53 +1,52 @@
 ﻿namespace StateMachine
 {
-    public class State
-    {
-        private static ulong _idGen = 0;
+	public class State
+	{
+		private static ulong _idGen = 0;
 
-        private byte _bitstate;
-        public bool Start
-        {
-            get { return (_bitstate & 0x01) == 0x01; }
-            set { _bitstate = (byte)(value ? _bitstate | 0x01 : _bitstate & 0xFE); }
-        }
+		private byte _bitstate;
 
-        public bool Final
-        {
-            get { return (_bitstate & 0x02) == 0x02; }
-            set { _bitstate = (byte)(value ? _bitstate | 0x02 : _bitstate & 0xFD); }
-        }
+		public bool Start {
+			get { return (_bitstate & 0x01) == 0x01; }
+			set { _bitstate = (byte)(value ? _bitstate | 0x01 : _bitstate & 0xFE); }
+		}
 
-        public ulong Id { get; private set; }
+		public bool Final {
+			get { return (_bitstate & 0x02) == 0x02; }
+			set { _bitstate = (byte)(value ? _bitstate | 0x02 : _bitstate & 0xFD); }
+		}
 
-        public string Name { get; set; }
+		public ulong Id { get; private set; }
 
-        public State()
-        {
-            Id = _idGen++;
-            _bitstate = 0x00;
-        }
+		public string Name { get; set; }
 
-        public State(ulong id)
-        {
-            Id = id;
-            _bitstate = 0x00;
-        }
+		public State()
+		{
+			Id = _idGen++;
+			_bitstate = 0x00;
+		}
 
-        public State(State other)
-        {
-            _bitstate = other._bitstate;
-            Id = other.Id;
-            Name = other.Name;
-        }
+		public State(ulong id)
+		{
+			Id = id;
+			_bitstate = 0x00;
+		}
 
-        public override bool Equals(object other)
-        {
-            return Id == (other as State)?.Id;
-        }
+		public State(State other)
+		{
+			_bitstate = other._bitstate;
+			Id = other.Id;
+			Name = other.Name;
+		}
 
-        public override int GetHashCode()
-        {
-            return Id.GetHashCode();
-        }
-    }
+		public override bool Equals(object obj)
+		{
+			return Id == (obj as State)?.Id;
+		}
+
+		public override int GetHashCode()
+		{
+			return Id.GetHashCode();
+		}
+	}
 }
