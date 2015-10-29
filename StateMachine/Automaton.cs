@@ -1,11 +1,28 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System;
 
 namespace StateMachine
 {
-	using StateNotFoundException = KeyNotFoundException;
 	using States = HashSet<State>;
 
+	public class StateNotFoundException : KeyNotFoundException
+	{
+		public StateNotFoundException()
+		{
+		}
+
+		public StateNotFoundException(string message) : base(message)
+		{
+		}
+
+		public StateNotFoundException(string message, Exception innerException) : base(message, innerException)
+		{
+		}
+	}
+
+	/// <summary>
+	/// Abstract state machine
+	/// </summary>
 	public abstract class Automaton<Event>
 	{
 		protected State _start;
@@ -22,7 +39,7 @@ namespace StateMachine
 
 		public State LastAdded { get; protected set; }
 
-		public Automaton()
+		protected Automaton()
 		{
 			_states = new HashSet<State>();
 			_events = new HashSet<Event>();
@@ -48,11 +65,11 @@ namespace StateMachine
 	/// </summary>
 	public class DFA<Event> : Automaton<Event>
 	{
-		private Dictionary<KeyValuePair<State, Event>, State> _table;
+		private readonly Dictionary<KeyValuePair<State, Event>, State> _table;
 
 		public State Current { get; private set; }
 
-		public DFA() : base()
+		public DFA()
 		{
 			_table = new Dictionary<KeyValuePair<State, Event>, State>();
 			Current = _start;
@@ -76,16 +93,14 @@ namespace StateMachine
 	public class NFA<Event> : Automaton<Event>
 	{
 		private readonly Dictionary<KeyValuePair<State, Event>, States> _table;
-
-		public static Event Epsilon { get; } = default(Event);
+		private readonly Dictionary<State, States> _epsClosures;
 
 		public States Current { get; private set; }
 
-		public NFA() : base()
+		public NFA()
 		{
 			_table = new Dictionary<KeyValuePair<State, Event>, States>();
-			Current = new States { _start };
-			_events.Add(Epsilon);
+			_epsClosures = new Dictionary<State, States> { { _start, new States { _start } } };
 		}
 
 		public override void AddTransition(State from, State to, Event e)
@@ -97,60 +112,74 @@ namespace StateMachine
 			_table[key].Add(to);
 		}
 
-		public DFA<Event> toDFA()
+		/// <summary>
+		/// Adds epsilon transition
+		/// </summary>
+		public void AddTransition(State from, State to)
 		{
-			var a = new DFA<Event>();
-			var used = new Dictionary<States, State>();
-			var q = new Queue<States>();
+			if (!_states.Contains(from))
+				throw new StateNotFoundException();
 
-			var st = transitStates(Epsilon, new States { _start });
-			used[st] = a.Start;
-			q.Enqueue(st);
+			if (_states.Add(to))
+				LastAdded = to;
 
-			while (q.Count > 0) {
-				var top = q.Dequeue();
-				foreach (var e in _events) {
-					q.Enqueue(st = transitStates(e, top));
-					var final = st.FirstOrDefault(s => s.Final);
-					var newState = final != null ? new State(final) : new State();
-					used[st] = newState;
-					a.AddTransition(used[top], newState, e);
-				}
-			}
-			return a;
+			if (!_epsClosures.ContainsKey(from))
+				_epsClosures.Add(from, new States { from });
+
+			if (!_epsClosures.ContainsKey(to))
+				_epsClosures.Add(to, new States { to });
+
+			//TODO: Unite with eps-closure of to-state
+			foreach (var pair in _epsClosures)
+				if (pair.Value.Contains(from))
+					pair.Value.UnionWith(_epsClosures[to]);
 		}
 
-		private States transitStates(Event e, States st)
+		public void Initialize()
 		{
-			States tmp, res = new States();
-			foreach (var s in st) {
-				_table.TryGetValue(new KeyValuePair<State, Event>(s, e), out tmp);
-				res.UnionWith(tmp);
-			}
-			return res;
+			Current = new States();
+			Current.UnionWith(_epsClosures[_start]);
 		}
 
 		public override void Trigger(Event e)
 		{
 			var state = new States();
-			foreach (var s in Current) {
-				States set;
-				if (_table.TryGetValue(new KeyValuePair<State, Event>(s, e), out set))
-					state.UnionWith(set);
-				if (_table.TryGetValue(new KeyValuePair<State, Event>(s, Epsilon), out set))
-					state.UnionWith(set);
+			foreach (State s in Current) {
+				States tmp;
+				if (_table.TryGetValue(new KeyValuePair<State, Event>(s, e), out tmp))
+					state.UnionWith(tmp);
 			}
 
-			if (state.Count == 0)
-				throw new StateNotFoundException();
+			var epsilonState = new States();
+			foreach (State s in state) {
+				States tmp;
+				if (_epsClosures.TryGetValue(s, out tmp))
+					epsilonState.UnionWith(tmp);
+				epsilonState.Add(s);
+			}
 
-			Current = state;
+			Current = epsilonState;
+
+			if (epsilonState.Count == 0)
+				throw new StateNotFoundException();
+		}
+
+		public DFA<Event> ToDFA()
+		{
+			throw new NotImplementedException();
 		}
 
 		public void Merge(NFA<Event> other)
 		{
 			_states.UnionWith(other._states);
 			_events.UnionWith(other._events);
+
+			foreach (var item in other._epsClosures) {
+				if (!_epsClosures.ContainsKey(item.Key))
+					_epsClosures.Add(item.Key, new States());
+				_epsClosures[item.Key].UnionWith(item.Value);
+			}
+
 			foreach (var item in other._table) {
 				if (!_table.ContainsKey(item.Key))
 					_table.Add(item.Key, new States());
