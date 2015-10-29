@@ -31,6 +31,36 @@ namespace Tests
 			var s2 = new State(s);
 			Assert.AreEqual(s, s2);
 		}
+
+		[Test]
+		public void NFATests()
+		{
+			var a = new NFA<char>();
+
+			// "a" automaton
+			a.AddTransition(a.Start, new State { Final = true }, 'a');
+			a.Initialize();
+
+			a.Trigger('a');
+			Assert.True(a.Current.Contains(a.LastAdded));
+
+			a.Initialize();
+			Assert.Throws(typeof(StateNotFoundException), () => a.Trigger('b'));
+
+			// "abcd" automaton
+			a = new NFA<char>();
+			a.AddTransition(a.Start, new State(), 'a');
+			a.AddTransition(a.LastAdded, new State(), 'b');
+			a.AddTransition(a.LastAdded, new State(), 'c');
+			a.AddTransition(a.LastAdded, new State { Final = true }, 'd');
+			a.Initialize();
+
+			foreach (char c in "abcd") {
+				Assert.False(a.Current.Contains(a.LastAdded));
+				a.Trigger(c);
+			}
+			Assert.True(a.Current.Contains(a.LastAdded));
+			Assert.Throws(typeof(StateNotFoundException), () => a.Trigger('a'));
+		}
 	}
 }
-

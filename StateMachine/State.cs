@@ -41,12 +41,20 @@
 
 		public override bool Equals(object obj)
 		{
-			return Id == (obj as State)?.Id;
+			var state = obj as State;
+			if (state != null)
+				return Id == state.Id;
+			return false;
 		}
 
 		public override int GetHashCode()
 		{
 			return Id.GetHashCode();
+		}
+
+		public override string ToString()
+		{
+			return string.Format("[State: Start={0}, Final={1}, Id={2}, Name={3}]", Start, Final, Id, Name);
 		}
 	}
 }
