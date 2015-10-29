@@ -1,56 +1,51 @@
-﻿using System.Linq;
-using NUnit.Framework;
-using Lexer;
+﻿using Lexer;
 using StateMachine;
-using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
 {
-	[TestFixture]
-	public class LexerTests
-	{
-		[Test]
-		[TestCase("abc", "ab.c.")]
-		[TestCase("ab|c", "ab.c|")]
-		[TestCase("ab+c", "ab+.c.")]
-		[TestCase("a(bb)+c", "abb.+.c.")]
-		public void RegexConverterTests(string re, string pos)
-		{
-			var conv = new RegexConverter();
-			conv.Regex = re;
-			Assert.AreEqual(pos, conv.Postfix);
-		}
+    [TestClass]
+    public class LexerTests
+    {
 
-		[Test]
-		[TestCase("a", "a", false)]
-		[TestCase("a", "b", true)]
-		[TestCase("abc", "abc", false)]
-		[TestCase("abc", "abd", true)]
-		[TestCase("abc", "abcd", true)]
-		[TestCase("abcd", "abcd", false)]
-		[TestCase("a|b", "a", false)]
-		[TestCase("a|b", "b", false)]
-		[TestCase("a|b", "c", true)]
-		[TestCase("ab?", "a", false)]
-		[TestCase("ab?", "ab", false)]
-		[TestCase("ab*", "a", false)]
-		[TestCase("ab*", "abbbbb", false)]
-		[TestCase("ab+", "abbbbb", false)]
-		public void RegexMachineTests(string re, string input, bool throws)
-		{
-			var m = new RegexMachine();
-			m.AddExpression(re, re);
+        private TestContext testContextInstance;
+        public TestContext TestContext
+        {
+            get { return testContextInstance; }
+            set { testContextInstance = value; }
+        }
 
-			TestDelegate act = () => {
-				foreach (char c in input)
-					m.Machine.Trigger(c);
-			};
 
-			if (throws)
-				Assert.Throws(typeof(StateNotFoundException), act);
-			else
-				Assert.DoesNotThrow(act);
-		}
-	}
+        [TestMethod]
+        public void RegexConverterTests(string re, string postfix)
+        {
+            var conv = new RegexConverter();
+            conv.Regex = re;
+            Assert.AreEqual(postfix, conv.Postfix);
+        }
+
+        [TestMethod]
+        public void RegexMachineSucceessTests(string re, string input)
+        {
+            var m = new RegexMachine();
+            m.AddExpression(re, re);
+            var a = m.Machine;
+
+            foreach (char c in input)
+                a.Trigger(c);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(StateNotFoundException))]
+        public void RegexMachineFailingTests(string re, string input)
+        {
+            var m = new RegexMachine();
+            m.AddExpression(re, re);
+            var a = m.Machine;
+
+            foreach (char c in input)
+                a.Trigger(c);
+        }
+    }
 }
 
