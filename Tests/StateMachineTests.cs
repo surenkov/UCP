@@ -1,79 +1,66 @@
-﻿using StateMachine;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
+using StateMachine;
 
 namespace Tests
 {
-    [TestClass]
-    public class StateMachineTests
-    {
-        [TestMethod]
-        public void StateTests()
-        {
-            var s = new State();
-            Assert.IsFalse(s.Start);
-            Assert.IsFalse(s.Final);
+	[TestFixture]
+	public class StateMachineTests
+	{
+		[Test]
+		public void StateTests()
+		{
+			var s = new State();
+			Assert.IsFalse(s.Start);
+			Assert.IsFalse(s.Final);
 
-            s.Name = "TK_STATE";
-            Assert.AreEqual(s.Name, "TK_STATE");
+			s.Name = "TK_STATE";
+			Assert.AreEqual(s.Name, "TK_STATE");
 
-            s.Start = true;
-            Assert.IsTrue(s.Start);
-            Assert.IsFalse(s.Final);
+			s.Start = true;
+			Assert.IsTrue(s.Start);
+			Assert.IsFalse(s.Final);
 
-            s.Final = true;
-            Assert.IsTrue(s.Final);
-            Assert.IsTrue(s.Start);
+			s.Final = true;
+			Assert.IsTrue(s.Final);
+			Assert.IsTrue(s.Start);
 
-            s.Start = false;
-            Assert.IsFalse(s.Start);
-            Assert.IsTrue(s.Final);
+			s.Start = false;
+			Assert.IsFalse(s.Start);
+			Assert.IsTrue(s.Final);
 
-            var s2 = new State(s);
-            Assert.AreEqual(s, s2);
-        }
+			var s2 = new State(s);
+			Assert.AreEqual(s, s2);
+		}
 
-        [TestMethod]
-        public void NFATriggerTests()
-        {
-            var a = new NFA<char>();
-            a.AddTransition(a.Start, new State { Final = true }, 'a');
-            a.Initialize();
-            a.Trigger('a');
-            Assert.IsTrue(a.Current.Contains(a.LastAdded));
+		[Test]
+		public void NFATests()
+		{
+			var a = new NFA<char>();
 
-            a = new NFA<char>();
-            a.AddTransition(a.Start, new State(), 'a');
-            a.AddTransition(a.LastAdded, new State(), 'b');
-            a.AddTransition(a.LastAdded, new State(), 'c');
-            a.AddTransition(a.LastAdded, new State { Final = true }, 'd');
-            a.Initialize();
+			// "a" automaton
+			a.AddTransition(a.Start, new State { Final = true }, 'a');
+			a.Initialize();
 
-            foreach (char c in "abcd") {
-                Assert.IsFalse(a.Current.Contains(a.LastAdded));
-                a.Trigger(c);
-            }
-            Assert.IsTrue(a.Current.Contains(a.LastAdded));
-        }
+			a.Trigger('a');
+			Assert.True(a.Current.Contains(a.LastAdded));
 
-        [TestMethod]
-        public void DFATriggerTests()
-        {
-            var a = new DFA<char>();
-            a.AddTransition(a.Start, new State { Final = true }, 'a');
-            a.Trigger('a');
-            Assert.AreEqual(a.Current, a.LastAdded);
+			a.Initialize();
+			Assert.Throws(typeof(StateNotFoundException), () => a.Trigger('b'));
 
-            a = new DFA<char>();
-            a.AddTransition(a.Start, new State(), 'a');
-            a.AddTransition(a.LastAdded, new State(), 'b');
-            a.AddTransition(a.LastAdded, new State(), 'c');
-            a.AddTransition(a.LastAdded, new State { Final = true }, 'd');
+			// "abcd" automaton
+			a = new NFA<char>();
+			a.AddTransition(a.Start, new State(), 'a');
+			a.AddTransition(a.LastAdded, new State(), 'b');
+			a.AddTransition(a.LastAdded, new State(), 'c');
+			a.AddTransition(a.LastAdded, new State { Final = true }, 'd');
+			a.Initialize();
 
-            foreach (char c in "abcd") {
-                Assert.AreNotEqual(a.Current, a.LastAdded);
-                a.Trigger(c);
-            }
-            Assert.AreEqual(a.Current, a.LastAdded);
-        }
-    }
+			foreach (char c in "abcd") {
+				Assert.False(a.Current.Contains(a.LastAdded));
+				a.Trigger(c);
+			}
+			Assert.True(a.Current.Contains(a.LastAdded));
+			Assert.Throws(typeof(StateNotFoundException), () => a.Trigger('a'));
+		}
+	}
 }
