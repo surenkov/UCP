@@ -4,25 +4,18 @@ namespace Lexer
 {
     public class RegexMachine
     {
-        private readonly RegexConverter _converter;
-
         private readonly MachineStack<char> _stack;
 
-        public NFA<char> Machine
-        {
-            get { return _stack.Peek(); }
-        }
+        public NFA<char> Machine => _stack.Peek();
 
         public RegexMachine()
         {
-            _converter = new RegexConverter();
             _stack = new MachineStack<char>();
         }
 
-        public void AddExpression(string name, string regex)
+        public void AddExpression(string regex, string name)
         {
-            _converter.Regex = regex;
-            foreach (char c in _converter.Postfix)
+            foreach (char c in RegexConverter.Postfix(regex))
             {
                 switch (c)
                 {
@@ -50,7 +43,14 @@ namespace Lexer
             }
             var automaton = _stack.Peek();
             automaton.LastAdded.Name = name;
+            automaton.LastAdded.Final = true;
             automaton.Initialize();
+        }
+
+        public void Build()
+        {
+            while (_stack.Count > 1)
+                _stack.Unite();
         }
     }
 }

@@ -3,64 +3,38 @@ using System.Text;
 
 namespace Lexer
 {
-    public class RegexConverter
+    public static class RegexConverter
     {
-        private static readonly Dictionary<char, int> _precedence;
-        private static readonly HashSet<char> _notafter;
-        private static readonly HashSet<char> _notbefore;
+        private static readonly Dictionary<char, int> Precedence;
+        private static readonly HashSet<char> NotAfter;
+        private static readonly HashSet<char> NotBefore;
 
         static RegexConverter()
         {
-            _precedence = new Dictionary<char, int> {
+            Precedence = new Dictionary<char, int> {
                 { '(', 1 }, { '|', 2 }, { '.', 3 }, { '?', 4 }, { '*', 4 }, { '+', 4 }
             };
-            _notafter = new HashSet<char> { '(', '|', '.' };
-            _notbefore = new HashSet<char> { ')', '|', '.', '?', '*', '+' };
+            NotAfter = new HashSet<char> { '(', '|', '.' };
+            NotBefore = new HashSet<char> { ')', '|', '.', '?', '*', '+' };
         }
 
-        private string _regex;
-
-        public string Regex
+        private static int Prec(char c)
         {
-            get { return _regex; }
-            set
+            return Precedence.ContainsKey(c) ? Precedence[c] : 6;
+        }
+
+        public static string Postfix(string regex)
+        {
+            var tmp = new StringBuilder(regex.Length * 2);
+            for (int i = 1; i < regex.Length; i++)
             {
-                if (_regex != value)
-                {
-                    _regex = value;
-                    _postfix = string.Empty;
-                }
+                tmp.Append(regex[i - 1]);
+                if (NotAfter.Contains(regex[i - 1]) || NotBefore.Contains(regex[i]))
+                    continue;
+                tmp.Append('.');
             }
-        }
-
-        private string _postfix;
-
-        public string Postfix
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_postfix))
-                    _postfix = ToPostfix();
-                return _postfix;
-            }
-        }
-
-        private static int Precedence(char c)
-        {
-            return _precedence.ContainsKey(c) ? _precedence[c] : 6;
-        }
-
-        private string ToPostfix()
-        {
-            var tmp = new StringBuilder(_regex.Length * 2);
-            for (int i = 1; i < _regex.Length; i++)
-            {
-                tmp.Append(_regex[i - 1]);
-                if (!(_notafter.Contains(_regex[i - 1]) || _notbefore.Contains(_regex[i])))
-                    tmp.Append('.');
-            }
-            if (_regex.Length > 0)
-                tmp.Append(_regex[_regex.Length - 1]);
+            if (regex.Length > 0)
+                tmp.Append(regex[regex.Length - 1]);
 
             var stack = new Stack<char>();
             var postfix = new StringBuilder(tmp.Length);
@@ -78,7 +52,7 @@ namespace Lexer
                         stack.Pop();
                         break;
                     default:
-                        while (stack.Count > 0 && Precedence(stack.Peek()) >= Precedence(c))
+                        while (stack.Count > 0 && Prec(stack.Peek()) >= Prec(c))
                             postfix.Append(stack.Pop());
                         stack.Push(c);
                         break;
