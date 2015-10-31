@@ -1,31 +1,32 @@
 ﻿using System.Collections.Generic;
-using System.Configuration;
 
 namespace StateMachine
 {
-    public class MachineStack<Event>
+    public class MachineStack<TEvent>
     {
-        private readonly Stack<NFA<Event>> _stack;
+        private readonly Stack<NFA<TEvent>> _stack;
 
         public MachineStack()
         {
-            _stack = new Stack<NFA<Event>>();
+            _stack = new Stack<NFA<TEvent>>();
         }
 
-        public void Push(NFA<Event> a)
+        public void Push(NFA<TEvent> a)
         {
             _stack.Push(a);
         }
 
-        public NFA<Event> Pop()
+        public NFA<TEvent> Pop()
         {
             return _stack.Pop();
         }
 
-        public NFA<Event> Peek()
+        public NFA<TEvent> Peek()
         {
             return _stack.Peek();
         }
+
+        public int Count => _stack.Count;
 
         /// <summary>
         /// Sequental concatenation
@@ -38,7 +39,7 @@ namespace StateMachine
             var a1 = _stack.Pop();
             var a2 = _stack.Pop();
 
-            var res = new NFA<Event>();
+            var res = new NFA<TEvent>();
             res.Merge(a1);
             res.Merge(a2);
 
@@ -62,7 +63,7 @@ namespace StateMachine
             var a1 = _stack.Pop();
             var a2 = _stack.Pop();
 
-            var res = new NFA<Event>();
+            var res = new NFA<TEvent>();
             res.Merge(a1);
             res.Merge(a2);
 
@@ -85,7 +86,7 @@ namespace StateMachine
                 return;
 
             var a = _stack.Pop();
-            var res = new NFA<Event>();
+            var res = new NFA<TEvent>();
             res.Merge(a);
 
             a.Start.Start = a.LastAdded.Final = false;
@@ -106,7 +107,7 @@ namespace StateMachine
                 return;
 
             var a = _stack.Pop();
-            var res = new NFA<Event>();
+            var res = new NFA<TEvent>();
             res.Merge(a);
 
             a.Start.Start = a.LastAdded.Final = false;
@@ -126,7 +127,7 @@ namespace StateMachine
                 return;
 
             var a = _stack.Pop();
-            var res = new NFA<Event>();
+            var res = new NFA<TEvent>();
             res.Merge(a);
 
             a.Start.Start = a.LastAdded.Final = false;

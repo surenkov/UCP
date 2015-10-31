@@ -1,12 +1,24 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.IO;
-using System.Configuration;
 
 namespace StateMachine
 {
-    using States = HashSet<State>;
+    public class States : HashSet<State>
+    {
+        public override bool Equals(object obj)
+        {
+            var other = obj as States;
+            if (other != null && other.Count != Count)
+                return false;
+            return other?.Intersect(this).Count() == Count;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Aggregate(Count, (current, state) => current ^ state.GetHashCode());
+        }
+    }
 
     public class StateNotFoundException : KeyNotFoundException
     {
@@ -14,11 +26,13 @@ namespace StateMachine
         {
         }
 
-        public StateNotFoundException(string message) : base(message)
+        public StateNotFoundException(string message)
+            : base(message)
         {
         }
 
-        public StateNotFoundException(string message, Exception innerException) : base(message, innerException)
+        public StateNotFoundException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
     }
@@ -26,19 +40,19 @@ namespace StateMachine
     /// <summary>
     /// Abstract state machine
     /// </summary>
-    public abstract class Automaton<Event>
+    public abstract class Automaton<TEvent>
     {
-        protected State _start;
-        protected States _states;
-        protected HashSet<Event> _events;
+        protected State StartState;
+        protected States States;
+        protected HashSet<TEvent> Events;
 
         public State Start
         {
-            get { return _start; }
+            get { return StartState; }
             set
             {
-                _states.Add(_start = value);
-                _start.Start = true;
+                States.Add(StartState = value);
+                StartState.Start = true;
             }
         }
 
@@ -46,49 +60,49 @@ namespace StateMachine
 
         protected Automaton()
         {
-            _states = new HashSet<State>();
-            _events = new HashSet<Event>();
+            States = new States();
+            Events = new HashSet<TEvent>();
 
-            _states.Add(LastAdded = Start = new State());
+            States.Add(LastAdded = Start = new State());
         }
 
-        public virtual void AddTransition(State from, State to, Event e)
+        public virtual void AddTransition(State from, State to, TEvent e)
         {
-            if (!_states.Contains(from))
+            if (!States.Contains(from))
                 throw new StateNotFoundException();
 
-            if (_states.Add(to))
+            if (States.Add(to))
                 LastAdded = to;
-            _events.Add(e);
+            Events.Add(e);
         }
 
-        public abstract void Trigger(Event e);
+        public abstract void Trigger(TEvent e);
     }
 
     /// <summary>
     /// Deterministic finite-state machine
     /// </summary>
-    public class DFA<Event> : Automaton<Event>
+    public class DFA<TEvent> : Automaton<TEvent>
     {
-        private readonly Dictionary<KeyValuePair<State, Event>, State> _table;
+        private readonly Dictionary<KeyValuePair<State, TEvent>, State> _table;
 
         public State Current { get; private set; }
 
         public DFA()
         {
-            _table = new Dictionary<KeyValuePair<State, Event>, State>();
-            Current = _start;
+            _table = new Dictionary<KeyValuePair<State, TEvent>, State>();
+            Current = StartState;
         }
 
-        public override void AddTransition(State from, State to, Event e)
+        public override void AddTransition(State from, State to, TEvent e)
         {
             base.AddTransition(from, to, e);
-            _table.Add(new KeyValuePair<State, Event>(from, e), to);
+            _table[new KeyValuePair<State, TEvent>(from, e)] = to;
         }
 
-        public override void Trigger(Event e)
+        public override void Trigger(TEvent e)
         {
-            var key = new KeyValuePair<State, Event>(Current, e);
+            var key = new KeyValuePair<State, TEvent>(Current, e);
             if (!_table.ContainsKey(key))
                 throw new StateNotFoundException();
             Current = _table[key];
@@ -98,23 +112,23 @@ namespace StateMachine
     /// <summary>
     /// Non-deterministic finite-state machine
     /// </summary>
-    public class NFA<Event> : Automaton<Event>
+    public class NFA<TEvent> : Automaton<TEvent>
     {
-        private readonly Dictionary<KeyValuePair<State, Event>, States> _table;
+        private readonly Dictionary<KeyValuePair<State, TEvent>, States> _table;
         private readonly Dictionary<State, States> _epsClosures;
 
         public States Current { get; private set; }
 
         public NFA()
         {
-            _table = new Dictionary<KeyValuePair<State, Event>, States>();
-            _epsClosures = new Dictionary<State, States> { { _start, new States { _start } } };
+            _table = new Dictionary<KeyValuePair<State, TEvent>, States>();
+            _epsClosures = new Dictionary<State, States> { { StartState, new States { StartState } } };
         }
 
-        public override void AddTransition(State from, State to, Event e)
+        public override void AddTransition(State from, State to, TEvent e)
         {
             base.AddTransition(from, to, e);
-            var key = new KeyValuePair<State, Event>(from, e);
+            var key = new KeyValuePair<State, TEvent>(from, e);
             if (!_table.ContainsKey(key))
                 _table.Add(key, new States());
             _table[key].Add(to);
@@ -125,10 +139,10 @@ namespace StateMachine
         /// </summary>
         public void AddTransition(State from, State to)
         {
-            if (!_states.Contains(from))
+            if (!States.Contains(from))
                 throw new StateNotFoundException();
 
-            if (_states.Add(to))
+            if (States.Add(to))
                 LastAdded = to;
 
             if (!_epsClosures.ContainsKey(from))
@@ -145,16 +159,16 @@ namespace StateMachine
         public void Initialize()
         {
             Current = new States();
-            Current.UnionWith(_epsClosures[_start]);
+            Current.UnionWith(_epsClosures[StartState]);
         }
 
-        private States TransitState(States st, Event e)
+        private States TransitState(States st, TEvent e)
         {
             var state = new States();
             foreach (State s in st)
             {
                 States tmp;
-                if (_table.TryGetValue(new KeyValuePair<State, Event>(s, e), out tmp))
+                if (_table.TryGetValue(new KeyValuePair<State, TEvent>(s, e), out tmp))
                     state.UnionWith(tmp);
             }
 
@@ -170,22 +184,22 @@ namespace StateMachine
             return epsilonState;
         }
 
-        public override void Trigger(Event e)
+        public override void Trigger(TEvent e)
         {
             Current = TransitState(Current, e);
             if (Current.Count == 0)
                 throw new StateNotFoundException();
         }
 
-        public DFA<Event> ToDFA()
+        public DFA<TEvent> ToDFA()
         {
-            var a = new DFA<Event>();
+            var a = new DFA<TEvent>();
             var q = new Queue<States>();
-            var table = new Dictionary<States, State>();
+            var map = new Dictionary<States, State>();
             var used = new HashSet<States>();
 
-            q.Enqueue(_epsClosures[_start]);
-            table.Add(q.Peek(), a.Start);
+            q.Enqueue(_epsClosures[StartState]);
+            map.Add(q.Peek(), a.Start);
 
             while (q.Count > 0)
             {
@@ -193,29 +207,33 @@ namespace StateMachine
                 if (!used.Add(state))
                     continue;
 
-                foreach (Event e in _events)
+                foreach (TEvent e in Events)
                 {
                     var next = TransitState(state, e);
                     if (next.Count == 0)
                         continue;
-
                     q.Enqueue(next);
 
-                    State final = next.FirstOrDefault(s => s.Final);
-                    State newState = final == null ? new State() : new State(final);
-                    table[next] = newState;
+                    var newState = map.ContainsKey(next)
+                        ? map[next]
+                        : new State
+                        {
+                            Start = next.FirstOrDefault(s => s.Start) != null,
+                            Final = next.FirstOrDefault(s => s.Final) != null,
+                            Name = string.Join(";", next.Select(s => s.Name).ToArray())
+                        };
 
-                    a.AddTransition(table[state], newState, e);
+                    map[next] = newState;
+                    a.AddTransition(map[state], newState, e);
                 }
             }
-
             return a;
         }
 
-        public void Merge(NFA<Event> other)
+        public void Merge(NFA<TEvent> other)
         {
-            _states.UnionWith(other._states);
-            _events.UnionWith(other._events);
+            States.UnionWith(other.States);
+            Events.UnionWith(other.Events);
 
             foreach (var item in other._epsClosures)
             {
