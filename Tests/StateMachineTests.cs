@@ -13,9 +13,6 @@ namespace Tests
 			Assert.IsFalse(s.Start);
 			Assert.IsFalse(s.Final);
 
-			s.Name = "TK_STATE";
-			Assert.AreEqual(s.Name, "TK_STATE");
-
 			s.Start = true;
 			Assert.IsTrue(s.Start);
 			Assert.IsFalse(s.Final);
@@ -39,12 +36,12 @@ namespace Tests
 
 			// "a" automaton
 			a.AddTransition(a.Start, new State { Final = true }, 'a');
-			a.Initialize();
+			a.Initial();
 
 			a.Trigger('a');
 			Assert.True(a.Current.Contains(a.LastAdded));
 
-			a.Initialize();
+			a.Initial();
 			Assert.Throws(typeof(StateNotFoundException), () => a.Trigger('b'));
 
 			// "abcd" automaton
@@ -53,7 +50,7 @@ namespace Tests
 			a.AddTransition(a.LastAdded, new State(), 'b');
 			a.AddTransition(a.LastAdded, new State(), 'c');
 			a.AddTransition(a.LastAdded, new State { Final = true }, 'd');
-			a.Initialize();
+			a.Initial();
 
 			foreach (char c in "abcd") {
 				Assert.False(a.Current.Contains(a.LastAdded));

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-namespace Lexer
+namespace LexicalAnalyzer
 {
     public static class RegexConverter
     {

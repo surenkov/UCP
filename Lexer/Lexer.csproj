@@ -7,7 +7,7 @@
     <ProjectGuid>{DC1C681A-6817-46A1-B2B6-632AF3831DE1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Lexer</RootNamespace>
+    <RootNamespace>LexicalAnalyzer</RootNamespace>
     <AssemblyName>Lexer</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -32,11 +32,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Lexer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegexConverter.cs" />
-    <Compile Include="RegexMachine.cs" />
+    <Compile Include="RegexBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\StateMachine\StateMachine.csproj">

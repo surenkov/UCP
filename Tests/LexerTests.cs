@@ -1,6 +1,7 @@
-﻿using System.Linq;
+﻿using System.Diagnostics;
+using System.Linq;
 using NUnit.Framework;
-using Lexer;
+using LexicalAnalyzer;
 using StateMachine;
 
 namespace Tests
@@ -52,7 +53,18 @@ namespace Tests
             {
                 Assert.DoesNotThrow(act);
                 Assert.IsTrue(a.Current.Final);
+                Assert.AreEqual(a.Name, re);
             }
+        }
+
+        [TestCase("Data/SampleSyntax.xml")]
+        public void LexerTestCases(string path)
+        {
+            var lexer = new Lexer();
+            lexer.LoadLexis(path);
+            lexer.SetSource("var 111   = 222;");
+            while (lexer.GetToken())
+                Debug.WriteLine($"<{lexer.Token}> : <{lexer.TokenType}>");
         }
     }
 }

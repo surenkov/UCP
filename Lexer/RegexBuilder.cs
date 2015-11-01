@@ -1,6 +1,6 @@
 ﻿using StateMachine;
 
-namespace Lexer
+namespace LexicalAnalyzer
 {
     public class RegexBuilder
     {
@@ -13,7 +13,7 @@ namespace Lexer
             _stack = new MachineStack<char>();
         }
 
-        public void AddExpression(string regex, string name)
+        public void AddExpression(string name, string regex)
         {
             foreach (char c in RegexConverter.Postfix(regex))
             {
@@ -36,15 +36,14 @@ namespace Lexer
                         break;
                     default:
                         var a = new NFA<char>();
-                        a.AddTransition(a.Start, new State { Final = true, Name = c.ToString() }, c);
+                        a.AddTransition(a.Start, new State { Final = true }, c);
                         _stack.Push(a);
                         break;
                 }
             }
             var automaton = _stack.Peek();
-            automaton.LastAdded.Name = name;
             automaton.LastAdded.Final = true;
-            automaton.Initialize();
+            automaton.SetName(automaton.LastAdded, name);
         }
 
         public void Build()
