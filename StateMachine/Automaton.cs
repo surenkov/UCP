@@ -57,6 +57,7 @@ namespace StateMachine
         protected State StartState;
         protected readonly States States;
         protected readonly HashSet<TEvent> Events;
+        protected readonly Dictionary<ulong, string> Names;
 
         public State Start
         {
@@ -74,6 +75,7 @@ namespace StateMachine
         {
             States = new States();
             Events = new HashSet<TEvent>();
+            Names = new Dictionary<ulong, string>();
 
             States.Add(LastAdded = Start = new State());
         }
@@ -88,7 +90,16 @@ namespace StateMachine
             Events.Add(e);
         }
 
+        public void SetName(State st, string name)
+        {
+            if (!States.Contains(st))
+                throw new StateNotFoundException();
+            Names[st.Id] = name;
+        }
+
         public abstract void Trigger(TEvent e);
+
+        public abstract void Initial();
     }
 
     /// <summary>
@@ -99,6 +110,8 @@ namespace StateMachine
         private readonly Dictionary<KeyValuePair<State, TEvent>, State> _table;
 
         public State Current { get; private set; }
+
+        public string Name => Names[Current.Id];
 
         public DFA()
         {
@@ -119,6 +132,11 @@ namespace StateMachine
                 throw new StateNotFoundException();
             Current = _table[key];
         }
+
+        public override void Initial()
+        {
+            Current = Start;
+        }
     }
 
     /// <summary>
@@ -130,6 +148,8 @@ namespace StateMachine
         private readonly Dictionary<State, States> _epsClosures;
 
         public States Current { get; private set; }
+
+        public string[] Name => Current.Select(s => Names[s.Id]).ToArray();
 
         public NFA()
         {
@@ -168,7 +188,7 @@ namespace StateMachine
                     pair.Value.UnionWith(_epsClosures[to]);
         }
 
-        public void Initialize()
+        public override void Initial()
         {
             Current = new States();
             Current.UnionWith(_epsClosures[StartState]);
@@ -226,17 +246,20 @@ namespace StateMachine
                         continue;
                     q.Enqueue(next);
 
+                    var final = next.FirstOrDefault(s => Names.ContainsKey(s.Id));
+                    string name; Names.TryGetValue(final?.Id ?? ulong.MaxValue, out name);
                     var newState = map.ContainsKey(next)
                         ? map[next]
                         : new State
                         {
                             Start = next.FirstOrDefault(s => s.Start) != null,
-                            Final = next.FirstOrDefault(s => s.Final) != null,
-                            Name = next.FirstOrDefault(s => s.Final)?.Name
+                            Final = final != null,
                         };
 
                     map[next] = newState;
                     a.AddTransition(map[state], newState, e);
+                    if (final != null)
+                        a.SetName(newState, name);
                 }
             }
             return a;
@@ -246,6 +269,9 @@ namespace StateMachine
         {
             States.UnionWith(other.States);
             Events.UnionWith(other.Events);
+
+            foreach (var pair in other.Names)
+                Names[pair.Key] = pair.Value;
 
             foreach (var item in other._epsClosures)
             {

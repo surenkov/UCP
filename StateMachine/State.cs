@@ -2,7 +2,7 @@
 {
     public class State
     {
-        private static ulong _idGen = 0;
+        private static ulong _idGen;
 
         private byte _bitstate;
 
@@ -18,9 +18,7 @@
             set { _bitstate = (byte)(value ? _bitstate | 0x02 : _bitstate & 0xFD); }
         }
 
-        public ulong Id { get; private set; }
-
-        public string Name { get; set; }
+        public ulong Id { get; }
 
         public State()
         {
@@ -38,15 +36,12 @@
         {
             _bitstate = other._bitstate;
             Id = other.Id;
-            Name = other.Name;
         }
 
         public override bool Equals(object obj)
         {
             var state = obj as State;
-            if (state != null)
-                return Id == state.Id;
-            return false;
+            return Id == state?.Id;
         }
 
         public override int GetHashCode()
@@ -56,7 +51,7 @@
 
         public override string ToString()
         {
-            return string.Format("[State: Start={0}, Final={1}, Id={2}, Name={3}]", Start, Final, Id, Name);
+            return $"[State: Start={Start}, Final={Final}, Id={Id}]";
         }
     }
 }
