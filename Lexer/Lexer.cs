@@ -24,7 +24,7 @@ namespace LexicalAnalyzer
     public class Lexer : IDisposable
     {
         private XmlReader _reader;
-        private DFA<char> _machine;
+        private Automaton<char> _machine;
         private TextReader _stream;
 
         public string Token { get; private set; }
@@ -74,14 +74,14 @@ namespace LexicalAnalyzer
             }
             catch (StateNotFoundException e)
             {
-                if (!_machine.Current.Final)
+                if (!_machine.IsFinal)
                     throw new UnknownTokenException($"Unknown token: {token}", e);
 
                 SetToken(token.ToString());
                 return _stream.Peek() != -1;
             }
 
-            if (!_machine.Current.Final)
+            if (!_machine.IsFinal)
                 throw new UnknownTokenException("Unexpected end of source");
 
             SetToken(token.ToString());

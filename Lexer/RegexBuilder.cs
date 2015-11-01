@@ -36,7 +36,7 @@ namespace LexicalAnalyzer
                         break;
                     default:
                         var a = new NFA<char>();
-                        a.AddTransition(a.Start, new State { Final = true }, c);
+                        a.AddTransition(a.Start, new State(), c);
                         _stack.Push(a);
                         break;
                 }

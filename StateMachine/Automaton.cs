@@ -9,9 +9,9 @@ namespace StateMachine
         public override bool Equals(object obj)
         {
             var other = obj as States;
-            if (other != null && other.Count != Count)
+            if (other == null || other.Count != Count)
                 return false;
-            return other?.Intersect(this).Count() == Count;
+            return other.All(Contains);
         }
 
         public override int GetHashCode()
@@ -71,6 +71,10 @@ namespace StateMachine
 
         public State LastAdded { get; protected set; }
 
+        public abstract bool IsFinal { get; }
+
+        public abstract string Name { get; }
+
         protected Automaton()
         {
             States = new States();
@@ -111,7 +115,9 @@ namespace StateMachine
 
         public State Current { get; private set; }
 
-        public string Name => Names[Current.Id];
+        public override string Name => Names[Current.Id];
+
+        public override bool IsFinal => Current.Final;
 
         public DFA()
         {
@@ -149,8 +155,10 @@ namespace StateMachine
 
         public States Current { get; private set; }
 
-        public string[] Name => Current.Select(s => Names[s.Id]).ToArray();
+        public override string Name => string.Join(";", Current.Select(s => Names[s.Id]));
 
+        public override bool IsFinal => Current.Any(s => s.Final);
+            
         public NFA()
         {
             _table = new Dictionary<KeyValuePair<State, TEvent>, States>();
