@@ -16,7 +16,19 @@ namespace StateMachine
 
         public override int GetHashCode()
         {
-            return this.Aggregate(Count, (current, state) => current ^ state.GetHashCode());
+            unchecked
+            {
+                int hash = 0;
+                foreach (var state in this)
+                {
+                    hash += state.GetHashCode();
+                    hash += (hash << 10);
+                    hash ^= (hash >> 6);
+                }
+                hash += (hash << 3);
+                hash ^= (hash >> 11);
+                return hash + (hash << 15);
+            }
         }
     }
 
@@ -43,8 +55,8 @@ namespace StateMachine
     public abstract class Automaton<TEvent>
     {
         protected State StartState;
-        protected States States;
-        protected HashSet<TEvent> Events;
+        protected readonly States States;
+        protected readonly HashSet<TEvent> Events;
 
         public State Start
         {
@@ -207,7 +219,7 @@ namespace StateMachine
                 if (!used.Add(state))
                     continue;
 
-                foreach (TEvent e in Events)
+                foreach (var e in Events)
                 {
                     var next = TransitState(state, e);
                     if (next.Count == 0)
@@ -220,7 +232,7 @@ namespace StateMachine
                         {
                             Start = next.FirstOrDefault(s => s.Start) != null,
                             Final = next.FirstOrDefault(s => s.Final) != null,
-                            Name = string.Join(";", next.Select(s => s.Name).ToArray())
+                            Name = next.FirstOrDefault(s => s.Final)?.Name
                         };
 
                     map[next] = newState;
