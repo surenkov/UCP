@@ -2,13 +2,13 @@
 
 namespace Lexer
 {
-    public class RegexMachine
+    public class RegexBuilder
     {
         private readonly MachineStack<char> _stack;
 
         public NFA<char> Machine => _stack.Peek();
 
-        public RegexMachine()
+        public RegexBuilder()
         {
             _stack = new MachineStack<char>();
         }

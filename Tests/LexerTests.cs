@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Linq;
+using NUnit.Framework;
 using Lexer;
 using StateMachine;
 
@@ -21,7 +22,6 @@ namespace Tests
         [TestCase("a", "a", false)]
         [TestCase("a", "b", true)]
         [TestCase("abc", "abc", false)]
-        [TestCase("abc", "abd", true)]
         [TestCase("abc", "abcd", true)]
         [TestCase("abcd", "abcd", false)]
         [TestCase("a|b", "a", false)]
@@ -32,21 +32,27 @@ namespace Tests
         [TestCase("ab*", "a", false)]
         [TestCase("ab*", "abbbbb", false)]
         [TestCase("ab+", "abbbbb", false)]
-        public void RegexMachineTests(string re, string input, bool throws)
+        [TestCase("(0|1|2|3)+", "231", false)]
+        [TestCase("(0|1|2|3)+", "234", true)]
+        [TestCase("private|public|protected", "private", false)]
+        [TestCase("private|public|protected", "public", false)]
+        [TestCase("private|public|protected", "protected", false)]
+        [TestCase("private|public|protected", "virtual", true)]
+        public void RegexBuilderTests(string re, string input, bool throws)
         {
-            var m = new RegexMachine();
-            m.AddExpression(re, re);
-            var a = m.Machine.ToDFA();
+            var builder = new RegexBuilder();
+            builder.AddExpression(re, re);
+            var a = builder.Machine.ToDFA();
 
-            TestDelegate act = () => {
-                foreach (char c in input)
-                    a.Trigger(c);
-            };
+            TestDelegate act = () => input.ToList().ForEach(c => a.Trigger(c));
 
             if (throws)
                 Assert.Throws(typeof(StateNotFoundException), act);
             else
+            {
                 Assert.DoesNotThrow(act);
+                Assert.IsTrue(a.Current.Final);
+            }
         }
     }
 }
