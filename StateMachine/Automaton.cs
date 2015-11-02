@@ -4,17 +4,20 @@ using System.Collections.Generic;
 
 namespace StateMachine
 {
+    [Serializable]
     public class States : HashSet<State>
     {
-        public override bool Equals(object obj)
+        private int _hash;
+
+        public States()
         {
-            var other = obj as States;
-            if (other == null || other.Count != Count)
-                return false;
-            return other.All(Contains);
         }
 
-        public override int GetHashCode()
+        public States(IEnumerable<State> collection) : base(collection)
+        {
+        }
+        
+        public States ReHash()
         {
             unchecked
             {
@@ -27,11 +30,23 @@ namespace StateMachine
                 }
                 hash += (hash << 3);
                 hash ^= (hash >> 11);
-                return hash + (hash << 15);
+                _hash = hash + (hash << 15);
             }
+            return this;
         }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as States;
+            if (other == null || other.Count != Count)
+                return false;
+            return other.All(Contains);
+        }
+
+        public override int GetHashCode() => _hash;
     }
 
+    [Serializable]
     public class StateNotFoundException : KeyNotFoundException
     {
         public StateNotFoundException()
@@ -73,7 +88,7 @@ namespace StateMachine
 
         public abstract bool IsFinal { get; }
 
-        public abstract string Name { get; }
+        public abstract string[] Name { get; }
 
         protected Automaton()
         {
@@ -90,7 +105,10 @@ namespace StateMachine
                 throw new StateNotFoundException();
 
             if (States.Add(to))
+            {
+                States.ReHash();
                 LastAdded = to;
+            }
             Events.Add(e);
         }
 
@@ -115,7 +133,7 @@ namespace StateMachine
 
         public State Current { get; private set; }
 
-        public override string Name => Names[Current.Id];
+        public override string[] Name => Names[Current.Id].Split(';');
 
         public override bool IsFinal => Current.Final;
 
@@ -155,8 +173,7 @@ namespace StateMachine
 
         public States Current { get; private set; }
 
-        public override string Name => string.Join(";", Current.Select(s => Names[s.Id]));
-
+        public override string[] Name => Current.Where(s => Names.ContainsKey(s.Id)).Select(s => Names[s.Id]).ToArray(); 
         public override bool IsFinal => Current.Any(s => s.Final);
             
         public NFA()
@@ -171,7 +188,9 @@ namespace StateMachine
             var key = new KeyValuePair<State, TEvent>(from, e);
             if (!_table.ContainsKey(key))
                 _table.Add(key, new States());
-            _table[key].Add(to);
+            var st = _table[key];
+            st.Add(to);
+            st.ReHash();
         }
 
         /// <summary>
@@ -200,6 +219,7 @@ namespace StateMachine
         {
             Current = new States();
             Current.UnionWith(_epsClosures[StartState]);
+            Current.ReHash();
         }
 
         private States TransitState(States st, TEvent e)
@@ -221,14 +241,18 @@ namespace StateMachine
                 epsilonState.Add(s);
             }
 
-            return epsilonState;
+            return epsilonState.ReHash();
         }
 
         public override void Trigger(TEvent e)
         {
-            Current = TransitState(Current, e);
-            if (Current.Count == 0)
+            var state = TransitState(Current, e);
+            if (state == null || state.Count == 0)
+            {
+                Current = new States(Current.Where(s => s.Final && Names.ContainsKey(s.Id)));
                 throw new StateNotFoundException();
+            }
+            Current = state;
         }
 
         public DFA<TEvent> ToDFA()
@@ -254,19 +278,21 @@ namespace StateMachine
                         continue;
                     q.Enqueue(next);
 
-                    var final = next.FirstOrDefault(s => Names.ContainsKey(s.Id));
-                    string name; Names.TryGetValue(final?.Id ?? ulong.MaxValue, out name);
+                    var finals = next.Where(s => s.Final).ToArray();
+                    var name = string.Join(";", finals
+                            .Where(s => Names.ContainsKey(s.Id))
+                            .Select(s => Names[s.Id]));
                     var newState = map.ContainsKey(next)
                         ? map[next]
                         : new State
                         {
                             Start = next.FirstOrDefault(s => s.Start) != null,
-                            Final = final != null,
+                            Final = finals.Length > 0,
                         };
 
                     map[next] = newState;
                     a.AddTransition(map[state], newState, e);
-                    if (final != null)
+                    if (finals.Length > 0)
                         a.SetName(newState, name);
                 }
             }
@@ -286,6 +312,7 @@ namespace StateMachine
                 if (!_epsClosures.ContainsKey(item.Key))
                     _epsClosures.Add(item.Key, new States());
                 _epsClosures[item.Key].UnionWith(item.Value);
+                _epsClosures[item.Key].ReHash();
             }
 
             foreach (var item in other._table)
@@ -293,6 +320,7 @@ namespace StateMachine
                 if (!_table.ContainsKey(item.Key))
                     _table.Add(item.Key, new States());
                 _table[item.Key].UnionWith(item.Value);
+                _table[item.Key].ReHash();
             }
         }
     }

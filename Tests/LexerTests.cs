@@ -9,11 +9,22 @@ namespace Tests
     [TestFixture]
     public class LexerTests
     {
+        private Lexer _lexer;
+
+        [TestFixtureSetUp]
+        public void Init()
+        {
+            _lexer = new Lexer("Data/SampleSyntax.xml");
+        }
+
         [Test]
         [TestCase("abc", "ab.c.")]
         [TestCase("ab|c", "ab.c|")]
         [TestCase("ab+c", "ab+.c.")]
         [TestCase("a(bb)+c", "abb.+.c.")]
+        [TestCase("[a-cA-C0-2]", "ab|c|A|B|C|0|1|2|")]
+        [TestCase("a[a-c]", "aab|c|.")]
+        [TestCase("a[b-c]d", "abc|.d.")]
         public void RegexConverterTests(string re, string pos)
         {
             Assert.AreEqual(pos, RegexConverter.Postfix(re));
@@ -47,24 +58,26 @@ namespace Tests
 
             TestDelegate act = () => input.ToList().ForEach(c => a.Trigger(c));
 
-            if (throws)
-                Assert.Throws(typeof(StateNotFoundException), act);
-            else
+            if (!throws)
             {
                 Assert.DoesNotThrow(act);
                 Assert.IsTrue(a.Current.Final);
-                Assert.AreEqual(a.Name, re);
+                Assert.AreEqual(a.Name.First(), re);
             }
+            else
+                Assert.Throws(typeof (StateNotFoundException), act);
         }
 
-        [TestCase("Data/SampleSyntax.xml")]
-        public void LexerTestCases(string path)
+        [TestCase("a")]
+        [TestCase("0x00A 007 990")]
+        [TestCase("var x interface{}")]
+        [TestCase("struct {}")]
+        [TestCase("type Point3D struct { x, y, z float64 }")]
+        public void LexerTestCases(string source)
         {
-            var lexer = new Lexer();
-            lexer.LoadLexis(path);
-            lexer.SetSource("var 111   = 222;");
-            while (lexer.GetToken())
-                Debug.WriteLine($"<{lexer.Token}> : <{lexer.TokenType}>");
+            _lexer.SetSource(source);
+            while (_lexer.GetToken())
+                Debug.WriteLine($"<{_lexer.Token}> : <{_lexer.TokenType}>");
         }
     }
 }
