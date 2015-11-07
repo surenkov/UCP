@@ -76,7 +76,7 @@ namespace LexicalAnalyzer
                 _prec[name] = prec;
             }
             builder.Build();
-            _machine = builder.Machine.ToDFA();
+            _machine = builder.Machine;
             _machine.Initial();
         }
 

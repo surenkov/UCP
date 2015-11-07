@@ -1,4 +1,5 @@
-﻿using StateMachine;
+﻿using System.IO;
+using StateMachine;
 
 namespace LexicalAnalyzer
 {
@@ -15,8 +16,11 @@ namespace LexicalAnalyzer
 
         public void AddExpression(string name, string regex)
         {
-            foreach (char c in RegexConverter.Postfix(regex))
+            var stream = new StringReader(InfixToPostfix.Convert(regex));
+            while (stream.Peek() != -1)
             {
+                var c = (char) stream.Read();
+                NFA<char> a;
                 switch (c)
                 {
                     case '.':
@@ -34,8 +38,14 @@ namespace LexicalAnalyzer
                     case '?':
                         _stack.Maybe();
                         break;
+                    case '\\':
+                        char n = (char) stream.Read();
+                        a = new NFA<char>();
+                        a.AddTransition(a.Start, new State(), n);
+                        _stack.Push(a);
+                        break;
                     default:
-                        var a = new NFA<char>();
+                        a = new NFA<char>();
                         a.AddTransition(a.Start, new State(), c);
                         _stack.Push(a);
                         break;

@@ -38,7 +38,7 @@ namespace StateMachine
         public override bool Equals(object obj)
         {
             var other = obj as States;
-            if (other == null || other.Count != Count)
+            if (other == null || other.Count != Count || other._hash != _hash)
                 return false;
             return other.All(Contains);
         }
@@ -105,10 +105,7 @@ namespace StateMachine
                 throw new StateNotFoundException();
 
             if (States.Add(to))
-            {
-                States.ReHash();
                 LastAdded = to;
-            }
             Events.Add(e);
         }
 
@@ -188,9 +185,7 @@ namespace StateMachine
             var key = new KeyValuePair<State, TEvent>(from, e);
             if (!_table.ContainsKey(key))
                 _table.Add(key, new States());
-            var st = _table[key];
-            st.Add(to);
-            st.ReHash();
+            _table[key].Add(to);
         }
 
         /// <summary>
@@ -262,7 +257,7 @@ namespace StateMachine
             var map = new Dictionary<States, State>();
             var used = new HashSet<States>();
 
-            q.Enqueue(_epsClosures[StartState]);
+            q.Enqueue(_epsClosures[StartState].ReHash());
             map.Add(q.Peek(), a.Start);
 
             while (q.Count > 0)
@@ -312,7 +307,6 @@ namespace StateMachine
                 if (!_epsClosures.ContainsKey(item.Key))
                     _epsClosures.Add(item.Key, new States());
                 _epsClosures[item.Key].UnionWith(item.Value);
-                _epsClosures[item.Key].ReHash();
             }
 
             foreach (var item in other._table)
@@ -320,7 +314,6 @@ namespace StateMachine
                 if (!_table.ContainsKey(item.Key))
                     _table.Add(item.Key, new States());
                 _table[item.Key].UnionWith(item.Value);
-                _table[item.Key].ReHash();
             }
         }
     }

@@ -22,12 +22,16 @@ namespace Tests
         [TestCase("ab|c", "ab.c|")]
         [TestCase("ab+c", "ab+.c.")]
         [TestCase("a(bb)+c", "abb.+.c.")]
+        [TestCase("a([b-d])+", "abc|d|+.")]
         [TestCase("[a-cA-C0-2]", "ab|c|A|B|C|0|1|2|")]
-        [TestCase("a[a-c]", "aab|c|.")]
+        [TestCase("a[a-d]", "aab|c|d|.")]
         [TestCase("a[b-c]d", "abc|.d.")]
+        [TestCase("a\\|b", "a\\|.b.")]
+        [TestCase("a\\|\\.b", "a\\|.\\..b.")]
+        [TestCase("a\\||\\.b", "a\\|.\\.b.|")]
         public void RegexConverterTests(string re, string pos)
         {
-            Assert.AreEqual(pos, RegexConverter.Postfix(re));
+            Assert.AreEqual(pos, InfixToPostfix.Convert(re));
         }
 
         [Test]
@@ -65,11 +69,15 @@ namespace Tests
                 Assert.AreEqual(a.Name.First(), re);
             }
             else
-                Assert.Throws(typeof (StateNotFoundException), act);
+                Assert.Throws(typeof(StateNotFoundException), act);
         }
 
         [TestCase("a")]
         [TestCase("0x00A 007 990")]
+        [TestCase(".0")]
+        [TestCase("72.40")]
+        [TestCase("a + b")]
+        [TestCase("a | b")]
         [TestCase("var x interface{}")]
         [TestCase("struct {}")]
         [TestCase("type Point3D struct { x, y, z float64 }")]
@@ -77,7 +85,7 @@ namespace Tests
         {
             _lexer.SetSource(source);
             while (_lexer.GetToken())
-                Debug.WriteLine($"<{_lexer.Token}> : <{_lexer.TokenType}>");
+                Debug.WriteLine($"<{_lexer.Token}> : {_lexer.TokenType}");
         }
     }
 }

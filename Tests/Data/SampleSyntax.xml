@@ -2,10 +2,11 @@
 <lexis>
   <token name="ws" expression=" +" />
   <token name="semicolon" expression=";" />
-  <token name="identifier" expression="[a-zA-Z|_]+[a-zA-Z0-9|_]*" />
+  <token name="identifier" expression="[a-zA-Z]+[a-zA-Z0-9]*" />
   <token name="keyword" precedence="1" expression="break|case|const|continue|default|else|for|func|goto|if|import|interface|map|package|range|return|select|struct|switch|type|var" />
-  <token name="operator" expression="-|/|%|&amp;|^|&lt;|&gt;|--|==|!=|,|!|:|=|{|}" />
+  <token name="operator" expression="-|\+|\*|/|%|\||&amp;|^|&lt;&lt;|&gt;&gt;|&amp;=|\|=|^=|&amp;&amp;|\|\||&lt;-|\+\+|--|&lt;|&gt;|=|==|!|!=|&lt;=|&gt;=|:=|\.\.\.|\(|\)|\[|\]|\{|\}|,|:" />
+  <token name="float" expression="[0-9]*\.[0-9]+" />
   <token name="decimal" expression="[1-9]+[0-9]*" />
   <token name="octal" expression="0[0-7]*" />
-  <token name="hex" expression="0(x|X)[0-9a-fA-F]+" />
+  <token name="hex" expression="0[xX][0-9a-fA-F]+" />
 </lexis>
