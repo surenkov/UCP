@@ -30,7 +30,7 @@ namespace LexicalAnalyzer
             };
             NotAfter = new HashSet<char> { '(', '|', '.', '\\' };
             NotBefore = new HashSet<char> { ')', '|', '.', '?', '*', '+' };
-            Escaped = new HashSet<char> { '(', ')', '[', ']', '{', '}', '|', '.', '+', '?', '*' };
+            Escaped = new HashSet<char> { '(', ')', '[', ']', '{', '}', '|', '.', '+', '?', '*', '-' };
         }
 
         public static string Convert(string regex)
