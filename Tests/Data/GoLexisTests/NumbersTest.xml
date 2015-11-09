@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<testCase>
+  <data>
+    <![CDATA[0x00A 007 990 0. 72.40 6.67428e-11 1E6 .25 .12345E+5]]>
+  </data>
+  <result>
+    <token value="0x00A" type="integral" />
+    <token value=" " type="ws" />
+    <token value="007" type="integral" />
+    <token value=" " type="ws" />
+    <token value="990" type="integral" />
+    <token value=" " type="ws" />
+    <token value="0." type="float" />
+    <token value=" " type="ws" />
+    <token value="72.40" type="float" />
+    <token value=" " type="ws" />
+    <token value="6.67428e-11" type="float" />
+    <token value=" " type="ws" />
+    <token value="1E6" type="float" />
+    <token value=" " type="ws" />
+    <token value=".25" type="float" />
+    <token value=" " type="ws" />
+    <token value=".12345E+5" type="float" />
+  </result>
+</testCase>

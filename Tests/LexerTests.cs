@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using NUnit.Framework;
 using LexicalAnalyzer;
 using StateMachine;
@@ -14,7 +16,7 @@ namespace Tests
         [TestFixtureSetUp]
         public void Init()
         {
-            _lexer = new Lexer("Data/SampleSyntax.xml");
+            _lexer = new Lexer("Data/SampleGoLangLexis.xml");
         }
 
         [Test]
@@ -72,26 +74,30 @@ namespace Tests
                 Assert.Throws(typeof(StateNotFoundException), act);
         }
 
-        [TestCase("a")]
-        [TestCase("0x00A 007 990")]
-        [TestCase("0.")]
-        [TestCase("72.40")]
-        [TestCase("6.67428e-11")]
-        [TestCase("1E6")]
-        [TestCase(".25")]
-        [TestCase(".12345E+5")]
-        [TestCase("`raw string example`")]
-        [TestCase("\"interpolated string example\"")]
-        [TestCase("a + b")]
-        [TestCase("a | b")]
-        [TestCase("var x interface{}")]
-        [TestCase("struct {}")]
-        [TestCase("type Point3D struct { x, y, z float64 }")]
-        public void LexerTestCases(string source)
+        [TestCase("Data/GoLexisTests/NumbersTest.xml")]
+        [TestCase("Data/GoLexisTests/ExpressionsTest.xml")]
+        [TestCase("Data/GoLexisTests/TypesTest.xml")]
+        [TestCase("Data/GoLexisTests/StringsTest.xml")]
+        public void LexerTestCases(string testPath)
         {
-            _lexer.SetSource(source);
-            while (_lexer.GetToken())
-                Debug.WriteLine($"<{_lexer.Token}> : {_lexer.TokenType}");
+            var testCase = XDocument.Load(testPath).Root;
+            Assert.NotNull(testCase);
+
+            var data = testCase.Element("data");
+            Assert.NotNull(data);
+            _lexer.SetSource(data.Value);
+
+            var result = testCase.Element("result");
+            Assert.NotNull(result);
+            foreach (var node in result.Elements("token"))
+            {
+                Assert.True(_lexer.GetToken());
+                Debug.WriteLine("<{0}>: {1}", _lexer.Token, _lexer.TokenType);
+
+                Assert.AreEqual(_lexer.Token, node.Attribute("value").Value);
+                Assert.AreEqual(_lexer.TokenType, node.Attribute("type").Value);
+            }
+            Assert.False(_lexer.GetToken());
         }
     }
 }

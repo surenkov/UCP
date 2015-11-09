@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<testCase>
+  <data>
+    <![CDATA[`raw string example` "interpolated string example"]]>
+  </data>
+  <result>
+    <token type="string" value="`raw string example`" />
+    <token type="ws" value=" " />
+    <token type="string" value="&quot;interpolated string example&quot;" />
+  </result>
+</testCase>

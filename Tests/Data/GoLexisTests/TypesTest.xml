@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<testCase>
+  <data>
+    <![CDATA[var x interface{}; struct {}; type Point3D struct { x, y, z float64 }]]>
+  </data>
+  <result>
+    <token type="keyword" value="var" />
+    <token value=" " type="ws" />
+    <token type="identifier" value="x" />
+    <token value=" " type="ws" />
+    <token type="keyword" value="interface" />
+    <token type="operator" value="{" />
+    <token type="operator" value="}" />
+    <token type="semicolon" value=";" />
+    <token value=" " type="ws" />
+    <token type="keyword" value="struct" />
+    <token value=" " type="ws" />
+    <token type="operator" value="{" />
+    <token type="operator" value="}" />
+    <token type="semicolon" value=";" />
+    <token value=" " type="ws" />
+    <token type="keyword" value="type" />
+    <token value=" " type="ws" />
+    <token type="identifier" value="Point3D" />
+    <token value=" " type="ws" />
+    <token type="keyword" value="struct" />
+    <token value=" " type="ws" />
+    <token type="operator" value="{" />
+    <token value=" " type="ws" />
+    <token type="identifier" value="x" />
+    <token type="operator" value="," />
+    <token value=" " type="ws" />
+    <token type="identifier" value="y" />
+    <token type="operator" value="," />
+    <token value=" " type="ws" />
+    <token type="identifier" value="z" />
+    <token value=" " type="ws" />
+    <token type="identifier" value="float64" />
+    <token value=" " type="ws" />
+    <token type="operator" value="}" />
+  </result>
+</testCase>

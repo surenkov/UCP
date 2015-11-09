@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<testCase>
+  <data>
+    <![CDATA[a | b << C * (D - E) + fun]]>
+  </data>
+  <result>
+    <token type="identifier" value="a" />
+    <token type="ws" value=" " />
+    <token type="operator" value="|" />
+    <token type="ws" value=" " />
+    <token type="identifier" value="b" />
+    <token type="ws" value=" " />
+    <token type="operator" value="&lt;&lt;" />
+    <token type="ws" value=" " />
+    <token type="identifier" value="C" />
+    <token type="ws" value=" " />
+    <token type="operator" value="*" />
+    <token type="ws" value=" " />
+    <token type="operator" value="(" />
+    <token type="identifier" value="D" />
+    <token type="ws" value=" " />
+    <token type="operator" value="-" />
+    <token type="ws" value=" " />
+    <token type="identifier" value="E" />
+    <token type="operator" value=")" />
+    <token type="ws" value=" " />
+    <token type="operator" value="+" />
+    <token type="ws" value=" " />
+    <token type="identifier" value="fun" />
+  </result>
+</testCase>
