@@ -8,4 +8,5 @@
   <token name="float" expression="([0-9]+\.[0-9]*([eE][\+\-]?[0-9]+)?)|([0-9]+[eE][\+\-]?[0-9]+)|(\.[0-9]+([eE][\+\-]?[0-9]+)?)" />
   <token name="string" expression="(`[a-zA-Z0-9_ ]*`)|(&quot;[a-zA-Z0-9_ ]*&quot;)" />
   <token name="integral" expression="([1-9]+[0-9]*)|(0[0-7]*)|(0[xX][0-9a-fA-F]+)" />
+  <token name="comment" expression="/\*[a-zA-Z0-9_ ]*\*/" />
 </lexis>

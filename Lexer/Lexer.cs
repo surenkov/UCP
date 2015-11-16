@@ -24,19 +24,36 @@ namespace LexicalAnalyzer
         }
     }
 
+    public class Token
+    {
+        public uint Line { get; set; }
+
+        public uint Column { get; set; }
+
+        public string Type { get; set; }
+
+        public string Value { get; set; }
+
+        public override string ToString()
+        {
+            return $"[Ln {Line}, Col {Column}] <{Type}>: <{Value}>";
+        }
+    }
+
     public class Lexer : IDisposable
     {
         private Automaton<char> _machine;
         private readonly Dictionary<string, int> _prec;
         private TextReader _stream;
+        private uint _line;
+        private uint _column;
 
-        public string Token { get; private set; }
-
-        public string TokenType { get; private set; }
+        public Token Token { get; private set; }
 
         public Lexer()
         {
             _prec = new Dictionary<string, int>();
+            _line = _column = 1;
         }
 
         public Lexer(string lexisPath) : this()
@@ -83,11 +100,13 @@ namespace LexicalAnalyzer
         public void SetSource(Stream stream)
         {
             _stream = new StreamReader(stream);
+            _line = _column = 1;
         }
 
         public void SetSource(string source)
         {
             _stream = new StringReader(source);
+            _line = _column = 1;
         }
 
         public bool GetToken()
@@ -104,6 +123,10 @@ namespace LexicalAnalyzer
                     _machine.Trigger(c);
                     token.Append(c);
                     _stream.Read();
+                    _column++;
+                    if (c != '\n') continue;
+                    _line++;
+                    _column = 1;
                 }
             }
             catch (StateNotFoundException e)
@@ -125,8 +148,13 @@ namespace LexicalAnalyzer
         private void SetToken(string token)
         {
             var names = _machine.Name;
-            Token = token;
-            TokenType = names.Aggregate(names.First(), (cur, str) => _prec[str] > _prec[cur] ? str : cur);
+            Token = new Token
+            {
+                Column = _column,
+                Line = _line,
+                Value = token,
+                Type = names.Aggregate(names.First(), (cur, str) => _prec[str] > _prec[cur] ? str : cur)
+            };
             _machine.Initial();
         }
 

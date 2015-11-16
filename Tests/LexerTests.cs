@@ -92,10 +92,10 @@ namespace Tests
             foreach (var node in result.Elements("token"))
             {
                 Assert.True(_lexer.GetToken());
-                Debug.WriteLine("<{0}>: {1}", _lexer.Token, _lexer.TokenType);
+                Debug.WriteLine(_lexer.Token);
 
-                Assert.AreEqual(_lexer.Token, node.Attribute("value").Value);
-                Assert.AreEqual(_lexer.TokenType, node.Attribute("type").Value);
+                Assert.AreEqual(_lexer.Token.Value, node.Attribute("value").Value);
+                Assert.AreEqual(_lexer.Token.Type, node.Attribute("type").Value);
             }
             Assert.False(_lexer.GetToken());
         }
