@@ -7,10 +7,6 @@ namespace LexicalAnalyzer
 {
     public class InvalidRegexException : Exception
     {
-        public InvalidRegexException()
-        {
-        }
-
         public InvalidRegexException(string message) : base(message)
         {
         }

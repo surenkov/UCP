@@ -8,13 +8,8 @@ using StateMachine;
 
 namespace LexicalAnalyzer
 {
-    [Serializable]
     public class UnknownTokenException : Exception
     {
-        public UnknownTokenException()
-        {
-        }
-
         public UnknownTokenException(string message) : base(message)
         {
         }
@@ -53,7 +48,7 @@ namespace LexicalAnalyzer
         public Lexer()
         {
             _prec = new Dictionary<string, int>();
-            _line = _column = 1;
+            _line = _column = 0;
         }
 
         public Lexer(string lexisPath) : this()
@@ -99,13 +94,17 @@ namespace LexicalAnalyzer
 
         public void SetSource(Stream stream)
         {
-            _stream = new StreamReader(stream);
-            _line = _column = 1;
+            SetSource(new StreamReader(stream));
         }
 
         public void SetSource(string source)
         {
-            _stream = new StringReader(source);
+            SetSource(new StringReader(source));
+        }
+
+        private void SetSource(TextReader source)
+        {
+            _stream = source;
             _line = _column = 1;
         }
 

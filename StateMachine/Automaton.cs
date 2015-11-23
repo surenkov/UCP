@@ -1,10 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 
 namespace StateMachine
 {
-    [Serializable]
     public class States : HashSet<State>
     {
         private int _hash;
@@ -13,7 +11,8 @@ namespace StateMachine
         {
         }
 
-        public States(IEnumerable<State> collection) : base(collection)
+        public States(IEnumerable<State> collection) 
+            : base(collection)
         {
         }
         
@@ -46,20 +45,9 @@ namespace StateMachine
         public override int GetHashCode() => _hash;
     }
 
-    [Serializable]
     public class StateNotFoundException : KeyNotFoundException
     {
         public StateNotFoundException()
-        {
-        }
-
-        public StateNotFoundException(string message)
-            : base(message)
-        {
-        }
-
-        public StateNotFoundException(string message, Exception innerException)
-            : base(message, innerException)
         {
         }
     }
@@ -77,7 +65,7 @@ namespace StateMachine
         public State Start
         {
             get { return StartState; }
-            set
+            private set
             {
                 States.Add(StartState = value);
                 StartState.Start = true;
