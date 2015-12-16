@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using NUnit.Framework;
@@ -16,10 +15,9 @@ namespace Tests
         [TestFixtureSetUp]
         public void Init()
         {
-            _lexer = new Lexer("Data/SampleGoLangLexis.xml");
+            _lexer = new Lexer("Data/GoLangLexis.xml");
         }
 
-        [Test]
         [TestCase("abc", "ab.c.")]
         [TestCase("ab|c", "ab.c|")]
         [TestCase("ab+c", "ab+.c.")]
@@ -36,7 +34,6 @@ namespace Tests
             Assert.AreEqual(pos, InfixToPostfix.Convert(re));
         }
 
-        [Test]
         [TestCase("a", "a", false)]
         [TestCase("a", "b", true)]
         [TestCase("abc", "abc", false)]
@@ -94,10 +91,18 @@ namespace Tests
                 Assert.True(_lexer.GetToken());
                 Debug.WriteLine(_lexer.Token);
 
-                Assert.AreEqual(_lexer.Token.Value, node.Attribute("value").Value);
-                Assert.AreEqual(_lexer.Token.Type, node.Attribute("type").Value);
+                Assert.AreEqual(node.Attribute("value").Value, _lexer.Token.Value);
+                Assert.AreEqual(node.Attribute("type").Value, _lexer.Token.Type);
             }
             Assert.False(_lexer.GetToken());
+        }
+
+        [Test]
+        public void BasicLexerTestCase()
+        {
+            _lexer.SetSource("\n\t\t\t\t\t\t\t     ;\n  /* Multiline \n\n\n comment */   \t a = b & c | d && e; // And inline comment \n a + b");
+            while (_lexer.GetToken())
+                Debug.WriteLine(_lexer.Token);
         }
     }
 }

@@ -58,9 +58,9 @@
     <Compile Include="StateMachineTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Lexer\Lexer.csproj">
+    <ProjectReference Include="..\Lexer\LexicalAnalyzer.csproj">
       <Project>{dc1c681a-6817-46a1-b2b6-632af3831de1}</Project>
-      <Name>Lexer</Name>
+      <Name>LexicalAnalyzer</Name>
     </ProjectReference>
     <ProjectReference Include="..\StateMachine\StateMachine.csproj">
       <Project>{5f9d67d1-2edc-4f67-a5e7-11f6708525e8}</Project>
@@ -72,6 +72,8 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="Data\GoLangGrammar.xml" />
+    <Content Include="Data\GoLangRules.xml" />
     <Content Include="Data\GoLexisTests\ExpressionsTest.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -84,7 +86,7 @@
     <Content Include="Data\GoLexisTests\TypesTest.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Data\SampleGoLangLexis.xml">
+    <Content Include="Data\GoLangLexis.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

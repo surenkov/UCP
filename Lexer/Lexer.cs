@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Xml.Schema;
 using StateMachine;
 
 namespace LexicalAnalyzer
@@ -29,42 +30,55 @@ namespace LexicalAnalyzer
 
         public string Value { get; set; }
 
+        public bool CanBeOmitted { get; set; }
+
+        public string Synonym { get; set; }
+
         public override string ToString()
         {
             return $"[Ln {Line}, Col {Column}] <{Type}>: <{Value}>";
         }
     }
 
+    [Serializable]
     public class Lexer : IDisposable
     {
         private Automaton<char> _machine;
         private readonly Dictionary<string, int> _prec;
-        private TextReader _stream;
-        private uint _line;
-        private uint _column;
+        private readonly Dictionary<string, bool> _omit;
+        [NonSerialized] private TextReader _stream;
+        [NonSerialized] private uint _line;
+        [NonSerialized] private uint _column;
 
         public Token Token { get; private set; }
 
         public Lexer()
         {
             _prec = new Dictionary<string, int>();
+            _omit = new Dictionary<string, bool>();
             _line = _column = 0;
         }
 
-        public Lexer(string lexisPath) : this()
+        public Lexer(string lexisPath, bool dfa = false) : this()
         {
-            LoadLexis(lexisPath);
+            LoadLexis(lexisPath, dfa);
         }
 
-        public void LoadLexis(string path)
+        public void LoadLexis(string path, bool dfa = false)
         {
-            var lexis = XmlReader.Create(path);
+            var schemas = new XmlSchemaSet();
+            schemas.Add("http://savva.moe/compiler/lexis.xsd", "Schemas/LexisSchema.xsd");
+            var lexis = XmlReader.Create(path, new XmlReaderSettings
+            {
+                ValidationType = ValidationType.Schema,
+                Schemas = schemas
+            });
             var builder = new RegexBuilder();
             while (lexis.Read())
             {
                 if (!lexis.IsStartElement()) continue;
 
-                string name, regex, precedence;
+                string name, regex, precedence, canBeOmitted;
                 switch (lexis.Name)
                 {
                     case "lexis":
@@ -73,6 +87,7 @@ namespace LexicalAnalyzer
                         name = lexis.GetAttribute("name");
                         regex = lexis.GetAttribute("expression");
                         precedence = lexis.GetAttribute("precedence");
+                        canBeOmitted = lexis.GetAttribute("omit");
                         break;
                     default:
                         throw new XmlException($"Lexis file cannot contain '{lexis.Name}' element");
@@ -83,12 +98,18 @@ namespace LexicalAnalyzer
                 builder.AddExpression(name, regex);
 
                 int prec;
-                if (!int.TryParse(precedence, out prec))
-                    prec = 0;
+                int.TryParse(precedence, out prec);
                 _prec[name] = prec;
+
+                bool omit;
+                bool.TryParse(canBeOmitted, out omit);
+                _omit[name] = omit;
             }
             builder.Build();
-            _machine = builder.Machine;
+            if (dfa)
+                _machine = builder.Machine.ToDFA();
+            else
+                _machine = builder.Machine;
             _machine.Initial();
         }
 
@@ -131,17 +152,23 @@ namespace LexicalAnalyzer
             catch (StateNotFoundException e)
             {
                 if (!_machine.IsFinal)
-                    throw new UnknownTokenException($"Unknown token: {token}", e);
+                    UnknownToken($"Unknown token: <{token}>, Ln: {_line} Col: {_column}", e);
 
                 SetToken(token.ToString());
                 return _stream.Peek() != -1;
             }
 
             if (!_machine.IsFinal)
-                throw new UnknownTokenException("Unexpected end of source");
+                UnknownToken("Unexpected end of source");
 
             SetToken(token.ToString());
             return true;
+        }
+
+        private void UnknownToken(string message, Exception innerException = null)
+        {
+            _machine.Initial();
+            throw new UnknownTokenException(message, innerException);
         }
 
         private void SetToken(string token)
@@ -152,8 +179,9 @@ namespace LexicalAnalyzer
                 Column = _column,
                 Line = _line,
                 Value = token,
-                Type = names.Aggregate(names.First(), (cur, str) => _prec[str] > _prec[cur] ? str : cur)
+                Type = names.Aggregate(names.First(), (cur, str) => _prec[str] > _prec[cur] ? str : cur),
             };
+            Token.CanBeOmitted = _omit[Token.Type];
             _machine.Initial();
         }
 

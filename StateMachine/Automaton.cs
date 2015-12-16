@@ -208,7 +208,7 @@ namespace StateMachine
         private States TransitState(States st, TEvent e)
         {
             var state = new States();
-            foreach (State s in st)
+            foreach (var s in st)
             {
                 States tmp;
                 if (_table.TryGetValue(new KeyValuePair<State, TEvent>(s, e), out tmp))
@@ -216,7 +216,7 @@ namespace StateMachine
             }
 
             var epsilonState = new States();
-            foreach (State s in state)
+            foreach (var s in state)
             {
                 States tmp;
                 if (_epsClosures.TryGetValue(s, out tmp))
@@ -231,10 +231,7 @@ namespace StateMachine
         {
             var state = TransitState(Current, e);
             if (state == null || state.Count == 0)
-            {
-                Current = new States(Current.Where(s => s.Final && Names.ContainsKey(s.Id)));
                 throw new StateNotFoundException();
-            }
             Current = state;
         }
 

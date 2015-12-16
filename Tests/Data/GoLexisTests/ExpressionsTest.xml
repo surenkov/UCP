@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <testCase>
   <data>
-    <![CDATA[a | b << C * (D - E) /* Hello world */ + fun]]>
+    <![CDATA[a | b << C * (D - E) /* Hello world */ + fun // Hello world]]>
   </data>
   <result>
     <token type="identifier" value="a" />
@@ -29,5 +29,7 @@
     <token type="operator" value="+" />
     <token type="ws" value=" " />
     <token type="identifier" value="fun" />
+    <token type="ws" value=" " />
+    <token type="comment" value="// Hello world" />
   </result>
 </testCase>

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using StateMachine;
 
 namespace LexicalAnalyzer
@@ -6,8 +7,25 @@ namespace LexicalAnalyzer
     public class RegexBuilder
     {
         private readonly MachineStack<char> _stack;
+        private static readonly Dictionary<char, char> EscapeDictionary;
 
         public NFA<char> Machine => _stack.Peek();
+
+        static RegexBuilder()
+        {
+            EscapeDictionary = new Dictionary<char, char>
+            {
+                { 'n', '\n' },
+                { '\\', '\\' },
+                { 't', '\t' },
+                { 's', ' ' }
+            };
+        }
+
+        private static char Escape(char c)
+        {
+            return EscapeDictionary.ContainsKey(c) ? EscapeDictionary[c] : c;
+        }
 
         public RegexBuilder()
         {
@@ -41,7 +59,7 @@ namespace LexicalAnalyzer
                     case '\\':
                         char n = (char) stream.Read();
                         a = new NFA<char>();
-                        a.AddTransition(a.Start, new State(), n);
+                        a.AddTransition(a.Start, new State(), Escape(n));
                         _stack.Push(a);
                         break;
                     default:

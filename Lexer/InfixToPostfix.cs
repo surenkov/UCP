@@ -15,7 +15,6 @@ namespace LexicalAnalyzer
     public class InfixToPostfix
     {
         private static readonly Dictionary<char, int> Precedence;
-        private static readonly Dictionary<char, string> Escaped;
         private static readonly HashSet<char> NotAfter;
         private static readonly HashSet<char> NotBefore;
         private static readonly HashSet<char> ToEscape;
@@ -27,8 +26,7 @@ namespace LexicalAnalyzer
             };
             NotAfter = new HashSet<char> { '(', '|', '.', '\\' };
             NotBefore = new HashSet<char> { ')', '|', '.', '?', '*', '+' };
-            ToEscape = new HashSet<char> { '(', ')', '[', ']', '{', '}', '|', '.', '+', '?', '*', '-' };
-            Escaped = new Dictionary<char, string> { { 'n', "\\\n" }, { '0', "\\\0" }, { 't', "\\\t" } };
+            ToEscape = new HashSet<char> { 'n', 't', 's', '(', ')', '[', ']', '|', '.', '+', '?', '*', '-' };
         }
 
         public static string Convert(string regex)
@@ -39,11 +37,6 @@ namespace LexicalAnalyzer
         private static int Prec(char c)
         {
             return Precedence.ContainsKey(c) ? Precedence[c] : 6;
-        }
-
-        private static string Escape(char c)
-        {
-            return Escaped.ContainsKey(c) ? Escaped[c] : "\\" + c;
         }
 
         private static void Error(string message)
@@ -78,7 +71,7 @@ namespace LexicalAnalyzer
                 bool finish = !escape && c == ']';
                 if (start) { range = true; tmp.Append('('); }
                 else if (finish) { range = false; tmp.Remove(tmp.Length - 1, 1).Append(')'); }
-                else if (!range) { tmp.Append(escape ? Escape(c) : c.ToString()); }
+                else if (!range) { tmp.Append(escape ? "\\" + c : c.ToString()); }
                 else
                 {
                     if (n == '-' && !escape)
@@ -88,7 +81,7 @@ namespace LexicalAnalyzer
                         for (char i = c; i < n; i++)
                             tmp.Append(i).Append('|');
                     }
-                    else tmp.Append(escape ? Escape(c) : c.ToString()).Append('|');
+                    else tmp.Append(escape ? "\\" + c : c.ToString()).Append('|');
                 }
             }
 
@@ -105,7 +98,7 @@ namespace LexicalAnalyzer
                 if (printDot && !NotBefore.Contains(c) || printDot && escape)
                     tmp.Append('.');
 
-                tmp.Append(escape ? Escape(c) : c.ToString());
+                tmp.Append(escape ? "\\" + c : c.ToString());
                 printDot = !NotAfter.Contains(c) || escape;
             }
 

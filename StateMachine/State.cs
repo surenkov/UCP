@@ -1,5 +1,8 @@
-﻿namespace StateMachine
+﻿using System;
+
+namespace StateMachine
 {
+    [Serializable]
     public class State
     {
         private static ulong _idGen;
