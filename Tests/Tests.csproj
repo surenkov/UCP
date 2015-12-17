@@ -66,6 +66,10 @@
       <Project>{5f9d67d1-2edc-4f67-a5e7-11f6708525e8}</Project>
       <Name>StateMachine</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SyntaxAnalyzer\SyntaxAnalyzer.csproj">
+      <Project>{fd6c826f-8f35-4e26-a3e6-e4f724d760ce}</Project>
+      <Name>SyntaxAnalyzer</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
