@@ -100,7 +100,9 @@ namespace Tests
         [Test]
         public void BasicLexerTestCase()
         {
-            _lexer.SetSource("\n\t\t\t\t\t\t\t     ;\n  /* Multiline \n\n\n comment */   \t a = b & c | d && e; // And inline comment \n a + b");
+            _lexer.SetSource("\n\t\t\t\t\t\t\t     ;\n  /* Multiline \n\n\n comment */ " +
+                             "  \t a = b & c | d && e; // And inline comment \n a + b" +
+                             "// Closing comment, why not (to test EOS)?");
             while (_lexer.GetToken())
                 Debug.WriteLine(_lexer.Token);
         }
