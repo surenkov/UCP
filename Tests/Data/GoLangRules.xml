@@ -1,4 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<lexis>
-  
-</lexis>
+<rules>
+  <rule term="NONTERMINAL" production="list of terminals and NONTERMINALS splitted by space" />
+  <rule term="NONTERMINAL2" production="" />
+</rules>

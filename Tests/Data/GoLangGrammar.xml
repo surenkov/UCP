@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<grammar>
-  <non-terminals path="" />
-  <start></start>
-  <rules path="" />
+<grammar xmlns="http://savva.moe/compiler/grammar.xsd">
+  <start>StartTerm</start>
+  <terminals path="GoLangLexis.xml" />
+  <rules path="GoLangRules.xml" />
 </grammar>

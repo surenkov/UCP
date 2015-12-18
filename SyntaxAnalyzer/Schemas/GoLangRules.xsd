@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://savva.moe/compiler/rules.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="rules">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" name="rule">
+          <xs:complexType>
+            <xs:attribute name="term" type="xs:string" use="required" />
+            <xs:attribute name="production" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LexicalAnalyzer", "Lexer\LexicalAnalyzer.csproj", "{DC1C681A-6817-46A1-B2B6-632AF3831DE1}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{BAFDD662-60B1-4278-8684-744D4275630D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SyntaxAnalyzer", "SyntaxAnalyzer\SyntaxAnalyzer.csproj", "{FD6C826F-8F35-4E26-A3E6-E4F724D760CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compiler", "Compiler\Compiler.csproj", "{A4D6EA8A-68D7-4D41-A34F-24DA20C45761}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{FD6C826F-8F35-4E26-A3E6-E4F724D760CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD6C826F-8F35-4E26-A3E6-E4F724D760CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FD6C826F-8F35-4E26-A3E6-E4F724D760CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4D6EA8A-68D7-4D41-A34F-24DA20C45761}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4D6EA8A-68D7-4D41-A34F-24DA20C45761}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4D6EA8A-68D7-4D41-A34F-24DA20C45761}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4D6EA8A-68D7-4D41-A34F-24DA20C45761}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
