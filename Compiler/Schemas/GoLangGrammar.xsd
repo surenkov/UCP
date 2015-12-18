@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://savva.moe/compiler/grammar.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="grammar">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="start" type="xs:string" />
+        <xs:element name="terminals">
+          <xs:complexType>
+            <xs:attribute name="path" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="rules">
+          <xs:complexType>
+            <xs:attribute name="path" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
