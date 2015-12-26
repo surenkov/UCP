@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,8 +33,6 @@ namespace LexicalAnalyzer
 
         public bool CanBeOmitted { get; set; }
 
-        public string Synonym { get; set; }
-
         public override string ToString()
         {
             return $"[Ln {Line}, Col {Column}] <{Type}>: <{Value}>";
@@ -41,7 +40,7 @@ namespace LexicalAnalyzer
     }
 
     [Serializable]
-    public class Lexer : IDisposable
+    public class Lexer : IDisposable, IEnumerable<Token>
     {
         private Automaton<char> _machine;
         private readonly Dictionary<string, int> _prec;
@@ -198,6 +197,17 @@ namespace LexicalAnalyzer
         public void Dispose()
         {
             _stream.Dispose();
+        }
+
+        public IEnumerator<Token> GetEnumerator()
+        {
+            while (GetToken())
+                yield return Token;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }
