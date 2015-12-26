@@ -47,9 +47,6 @@ namespace StateMachine
 
     public class StateNotFoundException : KeyNotFoundException
     {
-        public StateNotFoundException()
-        {
-        }
     }
 
     /// <summary>

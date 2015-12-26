@@ -71,7 +71,7 @@ namespace LexicalAnalyzer
                 bool finish = !escape && c == ']';
                 if (start) { range = true; tmp.Append('('); }
                 else if (finish) { range = false; tmp.Remove(tmp.Length - 1, 1).Append(')'); }
-                else if (!range) { tmp.Append(escape ? "\\" + c : c.ToString()); }
+                else if (!range) { tmp.AppendEscaped(escape, c); }
                 else
                 {
                     if (n == '-' && !escape)
@@ -81,7 +81,7 @@ namespace LexicalAnalyzer
                         for (char i = c; i < n; i++)
                             tmp.Append(i).Append('|');
                     }
-                    else tmp.Append(escape ? "\\" + c : c.ToString()).Append('|');
+                    else tmp.AppendEscaped(escape, c).Append('|');
                 }
             }
 
@@ -98,7 +98,7 @@ namespace LexicalAnalyzer
                 if (printDot && !NotBefore.Contains(c) || printDot && escape)
                     tmp.Append('.');
 
-                tmp.Append(escape ? "\\" + c : c.ToString());
+                tmp.AppendEscaped(escape, c);
                 printDot = !NotAfter.Contains(c) || escape;
             }
 
@@ -119,7 +119,7 @@ namespace LexicalAnalyzer
                     case '\\':
                         while (stack.Count > 0 && Prec(stack.Peek()) >= Prec(c))
                             postfix.Append(stack.Pop());
-                        postfix.Append("\\" + (char)reader.Read());
+                        postfix.AppendEscaped(true, (char)reader.Read());
                         break;
                     case '(':
                         stack.Push(c);
@@ -141,6 +141,15 @@ namespace LexicalAnalyzer
                 postfix.Append(stack.Pop());
 
             return postfix.ToString();
+        }
+    }
+
+    internal static class StringBuilderPostfixRegexExtension
+    {
+        internal static StringBuilder AppendEscaped(this StringBuilder builder, bool escape, char insert)
+        {
+            if (escape) builder.Append('\\');
+            return builder.Append(insert);
         }
     }
 }
