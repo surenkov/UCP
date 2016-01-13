@@ -3,7 +3,6 @@
   <xs:element name="grammar">
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="start" type="xs:string" />
         <xs:element name="terminals">
           <xs:complexType>
             <xs:attribute name="path" type="xs:string" use="required" />

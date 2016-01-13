@@ -5,9 +5,9 @@
   <token name="identifier" expression="[a-zA-Z]+[a-zA-Z0-9]*" />
   <token name="integral" expression="([1-9]+[0-9]*)|(0[0-7]*)|(0[xX][0-9a-fA-F]+)" />
   <token name="float" expression="([0-9]+\.[0-9]*([eE][\+\-]?[0-9]+)?)|([0-9]+[eE][\+\-]?[0-9]+)|(\.[0-9]+([eE][\+\-]?[0-9]+)?)" />
-  <token name="string" expression="(`[a-zA-Z0-9_ ]*`)|(&quot;[a-zA-Z0-9_ ]*&quot;)" />
-  <token name="comment" expression="(/\*[a-zA-Z0-9_\?,\.!\-\*\[\]\(\){}\\\+\s\t\n]*\*/)|(//[a-zA-Z0-9_\?,\.!\-\*\[\]\(\){}\\\+\s\t]+\n?)" omit="true" />
-  
+  <token name="string" expression="(`[a-zA-Z0-9_$%#@^~\?,\.!\-\*\[\]\(\){}\\\+\s\t\n]*`)|(&quot;[a-zA-Z0-9_$#%@\s\t\+\-\*\(\){}\[\]\\\?\,\.\!]*&quot;)" />
+  <token name="comment" expression="(/\*[a-zA-Z0-9_$%#@^`~\?,\.!\-\*\[\]\(\){}\\\+\s\t\n]*\*/)|(//[a-zA-Z0-9_$%#@^`~\?,\.!\-\*\[\]\(\){}\\\+\s\t]+\n?)" omit="true" />
+
   <token name="keyword" precedence="1" expression="break|case|const|continue|default|else|for|func|goto|if|import|interface|map|package|range|return|select|struct|switch|type|var" />
   <token name="operator" expression="-|\+|\*|/|%|\||&amp;|^|&lt;&lt;|&gt;&gt;|&amp;=|\|=|^=|&amp;&amp;|\|\||&lt;-|\+\+|--|&lt;|&gt;|=|==|!|!=|&lt;=|&gt;=|:=|\.\.\.|\(|\)|\[|\]|{|}|,|:" />
 </lexis>

@@ -31,7 +31,7 @@ namespace LexicalAnalyzer
 
         public string Value { get; set; }
 
-        public bool CanBeOmitted { get; set; }
+        public bool Required { get; set; }
 
         public override string ToString()
         {
@@ -44,18 +44,21 @@ namespace LexicalAnalyzer
     {
         private Automaton<char> _machine;
         private readonly Dictionary<string, int> _prec;
-        private readonly Dictionary<string, bool> _omit;
+        private readonly Dictionary<string, bool> _required;
         [NonSerialized] private TextReader _stream;
         [NonSerialized] private uint _line;
         [NonSerialized] private uint _column;
 
         public Token Token { get; private set; }
 
+        public bool YieldEndOfSource { get; set; }
+
         public Lexer()
         {
             _prec = new Dictionary<string, int>();
-            _omit = new Dictionary<string, bool>();
+            _required = new Dictionary<string, bool>();
             _line = _column = 0;
+            YieldEndOfSource = false;
         }
 
         public Lexer(string lexisPath, bool dfa = false) : this()
@@ -99,7 +102,7 @@ namespace LexicalAnalyzer
                         canBeOmitted = lexis.GetAttribute("omit");
                         break;
                     default:
-                        throw new XmlException($"Lexis file cannot contain '{lexis.Name}' element");
+                        throw new XmlException($"Lexis definition cannot contain '{lexis.Name}' element");
                 }
 
                 if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(regex))
@@ -112,7 +115,7 @@ namespace LexicalAnalyzer
 
                 bool omit;
                 bool.TryParse(canBeOmitted, out omit);
-                _omit[name] = omit;
+                _required[name] = !omit;
             }
             builder.Build();
             if (dfa)
@@ -190,7 +193,7 @@ namespace LexicalAnalyzer
                 Value = token,
                 Type = names.Aggregate(names.First(), (cur, str) => _prec[str] > _prec[cur] ? str : cur),
             };
-            Token.CanBeOmitted = _omit[Token.Type];
+            Token.Required = _required[Token.Type];
             _machine.Initial();
         }
 
@@ -203,6 +206,8 @@ namespace LexicalAnalyzer
         {
             while (GetToken())
                 yield return Token;
+            if (YieldEndOfSource)
+                yield return null;
         }
 
         IEnumerator IEnumerable.GetEnumerator()

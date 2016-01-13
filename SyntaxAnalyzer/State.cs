@@ -29,7 +29,7 @@ namespace SyntaxAnalyzer
     {
         public Token Token { get; set; }
 
-        public Terminal(string term) 
+        public Terminal(string term)
             : base(term)
         {
         }
@@ -37,31 +37,33 @@ namespace SyntaxAnalyzer
 
     public class NonTerminal : Symbol
     {
-        public NonTerminal(string term) 
+        public NonTerminal(string term)
             : base(term)
         {
         }
     }
 
-    internal class Rule
+    public class Rule
     {
-        public readonly int Index;
+        private readonly int _dot;
 
-        public readonly int Dot;
+        private readonly List<Symbol> _production;
+
+        public readonly int Index;
 
         public readonly NonTerminal Name;
 
-        public readonly List<Symbol> Production;
+        public Symbol NextTerm => _dot < _production.Count ? _production[_dot] : null;
 
-        public Symbol NextTerm => Production[Index];
+        public Symbol MatchedTerm => _dot > 0 ? _production[_dot - 1] : null;
 
-        public bool IsFinal => Dot >= Production.Count - 1;
+        public bool IsFinal => _dot >= _production.Count;
 
         private Rule(NonTerminal name, List<Symbol> production, int dot, int index)
         {
             Name = name;
-            Production = production;
-            Dot = dot;
+            _production = production;
+            _dot = dot;
             Index = index;
         }
 
@@ -71,26 +73,31 @@ namespace SyntaxAnalyzer
 
         public Rule Next() => Next(Index);
 
-        public Rule Next(int index) => IsFinal ? null : new Rule(Name, Production, Dot, index);
+        public Rule Next(int index) => !IsFinal ? new Rule(Name, _production, _dot + 1, index) : null;
 
         public override string ToString()
         {
-            return $"[{Name}] -> {{{string.Join(" ", Production.Take(Dot))} • {string.Join(" ", Production.Skip(Dot))}}}";
+            return $"{Name} → {string.Join(" ", _production.Take(_dot))} • {string.Join(" ", _production.Skip(_dot))} [{Index}]";
         }
 
         public override bool Equals(object obj)
         {
             var rule = obj as Rule;
             return rule != null
+                   && rule._dot.Equals(_dot)
                    && rule.Name.Equals(Name)
-                   && rule.Dot.Equals(Dot)
-                   && rule.Production.Equals(Production);
+                   && rule._production.Equals(_production);
         }
 
-        public override int GetHashCode() => (Name.GetHashCode() ^ Production.Count) << (Dot | Index);
+        public override int GetHashCode()
+        {
+            uint value = (uint)(Name.GetHashCode() ^ _production.Count);
+            int count = _dot % 33;
+            return (int)((value << count) | (value >> (32 - count)));
+        }
     }
 
-    internal class State : IEnumerable<Rule>
+    public class State : IEnumerable<Rule>
     {
         private readonly Dictionary<NonTerminal, HashSet<Rule>> _rulesByName;
 
@@ -100,9 +107,16 @@ namespace SyntaxAnalyzer
 
         public State()
         {
-            _rulesByName = new Dictionary<NonTerminal, HashSet<Rule>>();
-            _rulesByNextTerm = new Dictionary<Symbol, HashSet<Rule>>();
+            _rulesByName = new Dictionary<NonTerminal, HashSet<Rule>>(1);
+            _rulesByNextTerm = new Dictionary<Symbol, HashSet<Rule>>(1);
             _finalRules = new HashSet<NonTerminal>();
+        }
+
+        public State(IEnumerable<Rule> rules)
+            : this()
+        {
+            foreach (var rule in rules)
+                Add(rule);
         }
 
         public bool Contains(Rule rule)
@@ -115,13 +129,18 @@ namespace SyntaxAnalyzer
 
         public bool ContainsTerm(Symbol term) => _rulesByNextTerm.ContainsKey(term);
 
-        public bool ContainsFinal(NonTerminal term) => _finalRules.Contains(term);
-
-        public HashSet<Rule> Rules(NonTerminal term)
+        public HashSet<Rule> RulesByName(NonTerminal term)
         {
             HashSet<Rule> rules;
             _rulesByName.TryGetValue(term, out rules);
-            return rules;
+            return rules ?? new HashSet<Rule>();
+        }
+
+        public HashSet<Rule> RulesByNextTerm(Symbol term)
+        {
+            HashSet<Rule> rules;
+            _rulesByNextTerm.TryGetValue(term, out rules);
+            return rules ?? new HashSet<Rule>();
         }
 
         public void Add(Rule rule)
@@ -132,19 +151,15 @@ namespace SyntaxAnalyzer
             if (!_rulesByName.ContainsKey(name))
                 _rulesByName.Add(name, new HashSet<Rule>());
 
-            if (!_rulesByNextTerm.ContainsKey(next))
+            if (next != null && !_rulesByNextTerm.ContainsKey(next))
                 _rulesByNextTerm.Add(next, new HashSet<Rule>());
 
             if (rule.IsFinal)
                 _finalRules.Add(rule.Name);
 
+            if (next != null)
+                _rulesByNextTerm[next].Add(rule);
             _rulesByName[name].Add(rule);
-            _rulesByNextTerm[next].Add(rule);
-        }
-
-        public void MergeWith(IEnumerable<Rule> rules)
-        {
-            foreach (var rule in rules) Add(rule);
         }
 
         public IEnumerator<Rule> GetEnumerator()

@@ -3,6 +3,12 @@
   <xs:element name="rules">
     <xs:complexType>
       <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" name="start">
+          <xs:complexType>
+            <xs:attribute name="term" type="xs:string" use="required" />
+            <xs:attribute name="production" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
         <xs:element maxOccurs="unbounded" name="rule">
           <xs:complexType>
             <xs:attribute name="term" type="xs:string" use="required" />
