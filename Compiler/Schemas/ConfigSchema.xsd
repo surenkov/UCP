@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://savva.moe/compiler/grammar.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <xs:element name="grammar">
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://savva.moe/compiler/config.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="config">
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="terminals">
+        <xs:element name="lexis">
           <xs:complexType>
             <xs:attribute name="path" type="xs:string" use="required" />
           </xs:complexType>
         </xs:element>
-        <xs:element name="rules">
+        <xs:element name="grammar">
           <xs:complexType>
             <xs:attribute name="path" type="xs:string" use="required" />
           </xs:complexType>

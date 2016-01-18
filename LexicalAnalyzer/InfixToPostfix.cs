@@ -7,7 +7,8 @@ namespace LexicalAnalyzer
 {
     public class InvalidRegexException : Exception
     {
-        public InvalidRegexException(string message) : base(message)
+        public InvalidRegexException(string message) 
+            : base(message)
         {
         }
     }

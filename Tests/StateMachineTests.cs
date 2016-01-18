@@ -25,7 +25,7 @@ namespace Tests
 			Assert.IsFalse(s.Start);
 			Assert.IsTrue(s.Final);
 
-			var s2 = new State(s);
+			var s2 = s.Clone();
 			Assert.AreEqual(s, s2);
 		}
 

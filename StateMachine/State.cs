@@ -3,22 +3,22 @@
 namespace StateMachine
 {
     [Serializable]
-    public class State
+    public class State : ICloneable
     {
         private static ulong _idGen;
 
-        private byte _bitstate;
+        private byte _bitState;
 
         public bool Start
         {
-            get { return (_bitstate & 0x01) == 0x01; }
-            set { _bitstate = (byte)(value ? _bitstate | 0x01 : _bitstate & 0xFE); }
+            get { return (_bitState & 0x01) == 0x01; }
+            set { _bitState = (byte)(value ? _bitState | 0x01 : _bitState & 0xFE); }
         }
 
         public bool Final
         {
-            get { return (_bitstate & 0x02) == 0x02; }
-            set { _bitstate = (byte)(value ? _bitstate | 0x02 : _bitstate & 0xFD); }
+            get { return (_bitState & 0x02) == 0x02; }
+            set { _bitState = (byte)(value ? _bitState | 0x02 : _bitState & 0xFD); }
         }
 
         public ulong Id { get; }
@@ -26,20 +26,16 @@ namespace StateMachine
         public State()
         {
             Id = _idGen++;
-            _bitstate = 0x00;
+            _bitState = 0x00;
         }
 
         public State(ulong id)
         {
             Id = id;
-            _bitstate = 0x00;
+            _bitState = 0x00;
         }
 
-        public State(State other)
-        {
-            _bitstate = other._bitstate;
-            Id = other.Id;
-        }
+        public State Clone() => new State(Id) { _bitState = _bitState };
 
         public override bool Equals(object obj)
         {
@@ -47,14 +43,10 @@ namespace StateMachine
             return Id == state?.Id;
         }
 
-        public override int GetHashCode()
-        {
-            return Id.GetHashCode();
-        }
+        public override int GetHashCode() => Id.GetHashCode();
 
-        public override string ToString()
-        {
-            return $"[State: Start={Start}, Final={Final}, Id={Id}]";
-        }
+        public override string ToString() => $"[State: Start={Start}, Final={Final}, Id={Id}]";
+
+        object ICloneable.Clone() => Clone();
     }
 }
