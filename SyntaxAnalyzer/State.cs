@@ -71,13 +71,21 @@ namespace SyntaxAnalyzer
             : this(name, production, 0, index)
         { }
 
+        public Rule Previous() => Previous(Index);
+
+        public Rule Previous(int index) => _dot > 0 ? new Rule(Name, _production, _dot - 1, index) : null;
+
         public Rule Next() => Next(Index);
 
         public Rule Next(int index) => !IsFinal ? new Rule(Name, _production, _dot + 1, index) : null;
 
+        public Rule Final() => Final(Index);
+
+        public Rule Final(int index) => new Rule(Name, _production, _production.Count, index);
+
         public override string ToString()
         {
-            return $"{Name} → {string.Join(" ", _production.Take(_dot))} • {string.Join(" ", _production.Skip(_dot))} [{Index}]";
+            return $"{Name} → {string.Join(" ", _production.Take(_dot))} • {string.Join(" ", _production.Skip(_dot))}, {Index}";
         }
 
         public override bool Equals(object obj)
@@ -103,13 +111,16 @@ namespace SyntaxAnalyzer
 
         private readonly Dictionary<Symbol, HashSet<Rule>> _rulesByNextTerm;
 
-        private readonly HashSet<NonTerminal> _finalRules;
+        private readonly Dictionary<NonTerminal, HashSet<Rule>> _finalRules;
+
+        private readonly List<Rule> _orderedRules;
 
         public State()
         {
             _rulesByName = new Dictionary<NonTerminal, HashSet<Rule>>(1);
             _rulesByNextTerm = new Dictionary<Symbol, HashSet<Rule>>(1);
-            _finalRules = new HashSet<NonTerminal>();
+            _finalRules = new Dictionary<NonTerminal, HashSet<Rule>>();
+            _orderedRules = new List<Rule>(1);
         }
 
         public State(IEnumerable<Rule> rules)
@@ -129,47 +140,46 @@ namespace SyntaxAnalyzer
 
         public bool ContainsTerm(Symbol term) => _rulesByNextTerm.ContainsKey(term);
 
-        public HashSet<Rule> RulesByName(NonTerminal term)
-        {
-            HashSet<Rule> rules;
-            _rulesByName.TryGetValue(term, out rules);
-            return rules ?? new HashSet<Rule>();
-        }
+        public bool ContainsFinal(NonTerminal term) => _finalRules.ContainsKey(term);
 
-        public HashSet<Rule> RulesByNextTerm(Symbol term)
+        public HashSet<Rule> RulesByName(NonTerminal term) => GetRulesFromDictionary(_rulesByName, term);
+
+        public HashSet<Rule> RulesByNextTerm(Symbol term) => GetRulesFromDictionary(_rulesByNextTerm, term);
+
+        public HashSet<Rule> FinalRules(NonTerminal term) => GetRulesFromDictionary(_finalRules, term);
+
+        private static HashSet<Rule> GetRulesFromDictionary<T>(Dictionary<T, HashSet<Rule>> dict, T term)
         {
             HashSet<Rule> rules;
-            _rulesByNextTerm.TryGetValue(term, out rules);
-            return rules ?? new HashSet<Rule>();
+            dict.TryGetValue(term, out rules);
+            return rules != null ? new HashSet<Rule>(rules) : new HashSet<Rule>();
         }
 
         public void Add(Rule rule)
         {
             var name = rule.Name;
             var next = rule.NextTerm;
+            _orderedRules.Add(rule);
 
             if (!_rulesByName.ContainsKey(name))
                 _rulesByName.Add(name, new HashSet<Rule>());
-
-            if (next != null && !_rulesByNextTerm.ContainsKey(next))
-                _rulesByNextTerm.Add(next, new HashSet<Rule>());
-
-            if (rule.IsFinal)
-                _finalRules.Add(rule.Name);
+            _rulesByName[name].Add(rule);
 
             if (next != null)
+            {
+                if (!_rulesByNextTerm.ContainsKey(next))
+                    _rulesByNextTerm.Add(next, new HashSet<Rule>());
                 _rulesByNextTerm[next].Add(rule);
-            _rulesByName[name].Add(rule);
+            }
+
+            if (!rule.IsFinal) return;
+            if (!_finalRules.ContainsKey(name))
+                _finalRules.Add(name, new HashSet<Rule>());
+            _finalRules[name].Add(rule);
         }
 
-        public IEnumerator<Rule> GetEnumerator()
-        {
-            return _rulesByName.SelectMany(pair => pair.Value).GetEnumerator();
-        }
+        public IEnumerator<Rule> GetEnumerator() => _orderedRules.GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

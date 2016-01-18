@@ -1,5 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<grammar xmlns="http://savva.moe/compiler/grammar.xsd">
-  <terminals path="GoLangLexis.xml" />
-  <rules path="GoLangRules.xml" />
-</grammar>

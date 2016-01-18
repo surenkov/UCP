@@ -36,6 +36,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="dotMemory.Unit, Version=103.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <HintPath>..\packages\JetBrains.dotMemoryUnit.2.1.20150828.125449\Lib\dotMemory.Unit.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="nunit.framework, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
@@ -59,7 +63,7 @@
     <Compile Include="StateMachineTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Lexer\LexicalAnalyzer.csproj">
+    <ProjectReference Include="..\LexicalAnalyzer\LexicalAnalyzer.csproj">
       <Project>{dc1c681a-6817-46a1-b2b6-632af3831de1}</Project>
       <Name>LexicalAnalyzer</Name>
     </ProjectReference>
@@ -77,7 +81,7 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Content Include="Data\GoLangGrammar.xml">
+    <Content Include="Data\GoLangConfig.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\SampleExprRules.xml">

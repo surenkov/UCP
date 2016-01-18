@@ -1,12 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<rules xmlns="http://savva.moe/compiler/rules.xsd">
-  <start term="P" production="S" />
-
-  <rule term="S" production="S $+ M" />
-  <rule term="S" production="M" />
-
-  <rule term="M" production="M $* T" />
-  <rule term="M" production="T"/>
-
-  <rule term="T" production="$integral" />
-</rules>
+<grammar xmlns="http://savva.moe/compiler/grammar.xsd">
+  <start rule="E"/>
+  <rule term="E" production="T $+ E"/>
+  <rule term="E" production="T"/>
+  <rule term="T" production="F $* T"/>
+  <rule term="T" production="F"/>
+  <rule term="F" production="$( E $)"/>
+  <rule term="F" production="$a"/>
+</grammar>

@@ -10,7 +10,7 @@ namespace SyntaxAnalyzer
 {
     public class ParserException : Exception
     {
-        public ParserException(string message)
+        public ParserException(string message) 
             : base(message)
         {
         }
@@ -18,40 +18,38 @@ namespace SyntaxAnalyzer
 
     public class Parser
     {
-        private readonly Dictionary<string, List<List<Symbol>>> _productions;
-
-        internal Rule Start { get; private set; }
-
+        private Grammar _grammar;
+       
         public Parser()
         {
-            _productions = new Dictionary<string, List<List<Symbol>>>();
         }
 
         public Parser(string path) : this()
         {
-            LoadRules(path);
+            LoadGrammar(path);
         }
 
         public Parser(Stream stream) : this()
         {
-            LoadRules(stream);
+            LoadGrammar(stream);
         }
 
-        public void LoadRules(string path)
+        public void LoadGrammar(string path)
         {
-            LoadRules(new FileStream(path, FileMode.Open));
+            LoadGrammar(new FileStream(path, FileMode.Open));
         }
 
-        public void LoadRules(Stream stream)
+        public void LoadGrammar(Stream stream)
         {
             var schemas = new XmlSchemaSet();
-            schemas.Add("http://savva.moe/compiler/rules.xsd", "Schemas/RulesSchema.xsd");
+            schemas.Add("http://savva.moe/compiler/rules.xsd", "Schemas/GrammarSchema.xsd");
             var rules = XmlReader.Create(stream, new XmlReaderSettings
             {
                 ValidationType = ValidationType.Schema,
                 Schemas = schemas
             });
 
+            var g = new Grammar();
             while (rules.Read())
             {
                 if (!rules.IsStartElement()) continue;
@@ -59,9 +57,14 @@ namespace SyntaxAnalyzer
                 string term, product;
                 switch (rules.Name)
                 {
-                    case "rules":
+                    case "grammar":
                         continue;
                     case "start":
+                        string start = rules.GetAttribute("rule");
+                        if (string.IsNullOrWhiteSpace(start))
+                            throw new XmlException("Start rule cannot be empty");
+                        g.Start = new NonTerminal(start);
+                        continue;
                     case "rule":
                         term = rules.GetAttribute("term");
                         product = rules.GetAttribute("production");
@@ -71,10 +74,10 @@ namespace SyntaxAnalyzer
                 }
 
                 if (string.IsNullOrWhiteSpace(term))
-                    throw new InvalidDataException("Rule's term cannot be empty");
+                    throw new ParserException("Rule's term cannot be empty");
 
                 if (string.IsNullOrWhiteSpace(product))
-                    throw new NotImplementedException("Epsilon-rules aren't yet implemented");
+                    throw new NotImplementedException("Epsilon-rules are yet implemented");
 
                 var production = product
                     .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
@@ -86,33 +89,19 @@ namespace SyntaxAnalyzer
                     })
                     .ToList();
 
-                if (rules.Name != "start")
-                {
-                    if (!_productions.ContainsKey(term))
-                        _productions.Add(term, new List<List<Symbol>>(1));
-                    _productions[term].Add(production);
-                }
-                else
-                {
-                    Start = new Rule(new NonTerminal(term), production, 0);
-                }
+                g.Add(term, production);
             }
+            _grammar = g;
         }
 
-        public void Parse(IEnumerable<Token> tokens, bool requiredOnly = true)
+        public Node Parse(IEnumerable<Token> tokens)
         {
-            var parser = new EarleyParser(this);
-            parser.Parse(tokens.Where(t => t == null || t.Required || !requiredOnly));
-        }
+            if (_grammar == null)
+                throw new ParserException("Grammar must be loaded before calling Parse() method");
 
-        public List<Rule> GetRules(NonTerminal term, int index)
-        {
-            return _productions[term.Term].Select(production => new Rule(term, production, index)).ToList();
-        }
-
-        public List<Rule> GetRules(string term, int index)
-        {
-            return GetRules(new NonTerminal(term), index);
+            var parser = new EarleyParser(_grammar);
+            parser.Parse(tokens);
+            return parser.BuildTree();
         }
     }
 }

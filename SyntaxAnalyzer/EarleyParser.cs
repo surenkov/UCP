@@ -5,22 +5,20 @@ using LexicalAnalyzer;
 
 namespace SyntaxAnalyzer
 {
-    internal class EarleyParser
+    internal class EarleyParser : AbstractParser
     {
         private readonly List<State> _chart;
 
-        private readonly Parser _parser;
-
-        public EarleyParser(Parser parser)
+        public EarleyParser(Grammar grammar)
+            : base(grammar)
         {
             _chart = new List<State>();
-            _parser = parser;
         }
 
-        public void Parse(IEnumerable<Token> tokens)
+        public override void Parse(IEnumerable<Token> tokens)
         {
             _chart.Clear();
-            _chart.Add(new State { _parser.Start });
+            _chart.Add(new State(Grammar.GetStart()));
 
             var enumerator = tokens.GetEnumerator();
             for (int i = 0; enumerator.MoveNext(); i++)
@@ -54,9 +52,9 @@ namespace SyntaxAnalyzer
         {
             var nextTerm = rules[curIdx]?.NextTerm as NonTerminal;
             if (nextTerm == null)
-                throw new ParserException("Next predicted symbol is terminal");
+                throw new SyntaxException("Next predicted symbol is terminal");
 
-            var toAdd = _parser.GetRules(nextTerm, chartIdx);
+            var toAdd = Grammar.GetRules(nextTerm, chartIdx);
             rules.AddRange(toAdd.Where(r => !used.Contains(r)));
             used.UnionWith(toAdd);
         }
@@ -70,7 +68,7 @@ namespace SyntaxAnalyzer
 
             var terminal = nextRule.MatchedTerm as Terminal;
             if (terminal == null)
-                throw new ParserException("Next symbol to scan is non-terminal");
+                throw new SyntaxException("Next symbol to scan is non-terminal");
 
             terminal.Token = token;
 
@@ -83,7 +81,7 @@ namespace SyntaxAnalyzer
         {
             var final = rules[curIdx];
             if (!final.IsFinal)
-                throw new ParserException("Rule to complete is not final");
+                throw new SyntaxException("Rule to complete is not final");
 
             var toAdd = _chart[final.Index]
                 .RulesByNextTerm(final.Name)
@@ -95,13 +93,20 @@ namespace SyntaxAnalyzer
             used.UnionWith(toAdd);
         }
 
-        public Forest BuildParseForest()
+        public override Node BuildTree()
         {
-            var forest = new Forest();
-            throw new NotImplementedException();
+            if (!_chart[_chart.Count - 1].ContainsFinal(Grammar.Start))
+                throw new SyntaxException("Input string doesn't belong to the grammar");
+
+            var finals = Grammar.GetStart().Select(r => r.Final());
+            var gammas = _chart[_chart.Count - 1].FinalRules(Grammar.Start);
+            gammas.IntersectWith(finals);
+
+            return BuildTreesHelper(null, gammas.First(), _chart.Count - 1);
         }
 
-        private void BuildParseForestHelper()
+
+        private Node BuildTreesHelper(Node children, Rule rule, int chartIdx)
         {
             throw new NotImplementedException();
         }

@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<config xmlns="http://savva.moe/compiler/config.xsd">
+  <lexis path="GoLangLexis.xml" />
+  <grammar path="GoLangRules.xml" />
+</config>
