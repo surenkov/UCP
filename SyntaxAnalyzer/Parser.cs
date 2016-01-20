@@ -16,10 +16,13 @@ namespace SyntaxAnalyzer
         }
     }
 
+    /// <summary>
+    /// Parser interface, used by compiler
+    /// </summary>
     public class Parser
     {
-        private Grammar _grammar;
-       
+        public Grammar Grammar { get; private set; }
+
         public Parser()
         {
         }
@@ -91,15 +94,26 @@ namespace SyntaxAnalyzer
 
                 g.Add(term, production);
             }
-            _grammar = g;
+            Grammar = g;
         }
 
         public Node Parse(IEnumerable<Token> tokens)
         {
-            if (_grammar == null)
+            if (Grammar == null)
                 throw new ParserException("Grammar must be loaded before calling Parse() method");
 
-            var parser = new EarleyParser(_grammar);
+            var parser = new EarleyParser(Grammar);
+            return Parse(tokens, parser);
+        }
+
+        /// <summary>
+        /// Interface for building AST from tokens squence
+        /// </summary>
+        /// <param name="tokens">Tokens sequence</param>
+        /// <param name="parser">Custom parser</param>
+        /// <returns>AST' root</returns>
+        public Node Parse(IEnumerable<Token> tokens, AbstractParser parser)
+        {
             parser.Parse(tokens);
             return parser.BuildTree();
         }

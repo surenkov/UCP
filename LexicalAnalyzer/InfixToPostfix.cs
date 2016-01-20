@@ -13,6 +13,9 @@ namespace LexicalAnalyzer
         }
     }
 
+    /// <summary>
+    /// Converts lexis regexes from infix to postfix notation
+    /// </summary>
     public class InfixToPostfix
     {
         private static readonly Dictionary<char, int> Precedence;

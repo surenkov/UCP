@@ -10,6 +10,9 @@ using StateMachine;
 
 namespace LexicalAnalyzer
 {
+    /// <summary>
+    /// Interface for tokens' recognizer automaton.
+    /// </summary>
     [Serializable]
     public class Lexer : IDisposable, IEnumerable<Token>
     {
@@ -42,6 +45,14 @@ namespace LexicalAnalyzer
             LoadLexis(stream, dfa);
         }
 
+        /// <summary>
+        /// Loads lexis and builds recognize automaton
+        /// </summary>
+        /// <param name="path">Lexis specification</param>
+        /// <param name="dfa">Flag, which specifies automaton type: 
+        /// deterministic or non-deterministic.
+        /// DFA's building is significantly slower (creates up to 2^n of NFA states),
+        /// but recognizes much faster (O(n) instead of O(n*m), where n - token's length)</param>
         public void LoadLexis(string path, bool dfa)
         {
             LoadLexis(new FileStream(path, FileMode.Open), dfa);

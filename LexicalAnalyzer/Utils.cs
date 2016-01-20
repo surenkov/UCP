@@ -15,10 +15,19 @@ namespace LexicalAnalyzer
         }
     }
 
+    /// <summary>
+    /// Lexer's token
+    /// </summary>
     public class Token
     {
+        /// <summary>
+        /// Token's start line
+        /// </summary>
         public uint Line { get; set; }
 
+        /// <summary>
+        /// Token's start position in line
+        /// </summary>
         public uint Column { get; set; }
 
         public string Type { get; set; }
