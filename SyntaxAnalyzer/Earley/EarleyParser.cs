@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using LexicalAnalyzer;
 
-namespace SyntaxAnalyzer
+namespace SyntaxAnalyzer.Earley
 {
-    internal class EarleyParser : AbstractParser
+    class EarleyParser : AbstractParser
     {
         private readonly List<State> _chart;
 
@@ -15,56 +15,58 @@ namespace SyntaxAnalyzer
             _chart = new List<State>();
         }
 
-        public override void Parse(IEnumerable<Token> tokens)
+        public override Node Parse(IEnumerable<Token> tokens)
         {
             _chart.Clear();
-            _chart.Add(new State(Grammar.GetStart()));
+            _chart.Add(new State(Grammar.GetStart().Select(r => new IndexedRule(r, 0))));
 
             var enumerator = tokens.GetEnumerator();
             for (int i = 0; enumerator.MoveNext(); i++)
             {
-                var rules = new List<Rule>(_chart[i]);
-                var used = new HashSet<Rule>(_chart[i]);
+                var rules = _chart[i];
                 for (int j = 0; j < rules.Count; j++)
                 {
                     if (!rules[j].IsFinal)
                     {
                         if (rules[j].NextTerm.GetType() == typeof(NonTerminal))
                         {
-                            Predict(rules, used, j, i);
+                            Predict(i, j);
                         }
                         else
                         {
-                            Scan(rules[j], enumerator.Current, i);
+                            Scan(enumerator.Current, i, j);
                         }
                     }
                     else
                     {
-                        Complete(rules, used, j);
+                        Complete(i, j);
                     }
                 }
-                _chart[i] = new State(rules);
             }
             enumerator.Dispose();
+            return BuildTree();
         }
 
-        private void Predict(List<Rule> rules, HashSet<Rule> used, int curIdx, int chartIdx)
+        private void Predict(int chartIdx, int ruleIdx)
         {
-            var nextTerm = rules[curIdx]?.NextTerm as NonTerminal;
+            var nextTerm = _chart[chartIdx][ruleIdx]?.NextTerm as NonTerminal;
             if (nextTerm == null)
                 throw new SyntaxException("Next predicted symbol is terminal");
 
-            var toAdd = Grammar.GetRules(nextTerm, chartIdx);
-            rules.AddRange(toAdd.Where(r => !used.Contains(r)));
-            used.UnionWith(toAdd);
+            var toAdd = Grammar.GetRules(nextTerm).Indexed(chartIdx);
+            foreach (var rule in toAdd)
+                _chart[chartIdx].Add(rule);
         }
 
-        private void Scan(Rule rule, Token token, int chartIdx)
+        private void Scan(Token token, int chartIdx, int ruleIdx)
         {
-            if (token == null || rule.NextTerm.Term != token.Type) return;
+            var rule = _chart[chartIdx][ruleIdx];
+            if (token == null || rule.NextTerm.Term != token.Type)
+                return;
 
-            var nextRule = rule.Next();
-            if (nextRule == null) return;
+            var nextRule = rule.Next(rule.Index);
+            if (nextRule == null)
+                return;
 
             var terminal = nextRule.MatchedTerm as Terminal;
             if (terminal == null)
@@ -77,37 +79,30 @@ namespace SyntaxAnalyzer
             _chart[chartIdx + 1].Add(nextRule);
         }
 
-        private void Complete(List<Rule> rules, HashSet<Rule> used, int curIdx)
+        private void Complete(int chartIdx, int ruleIdx)
         {
-            var final = rules[curIdx];
+            var state = _chart[chartIdx];
+            var final = state[ruleIdx];
             if (!final.IsFinal)
                 throw new SyntaxException("Rule to complete is not final");
 
             var toAdd = _chart[final.Index]
                 .RulesByNextTerm(final.Name)
-                .Where(r => !used.Contains(r))
-                .Select(r => r.Next())
-                .ToArray();
+                .Select(r => r.Next(r.Index));
 
-            rules.AddRange(toAdd);
-            used.UnionWith(toAdd);
+            foreach (var rule in toAdd)
+                state.Add(rule);
         }
 
-        public override Node BuildTree()
+        private Node BuildTree()
         {
             if (!_chart[_chart.Count - 1].ContainsFinal(Grammar.Start))
                 throw new SyntaxException("Input string doesn't belong to the grammar");
 
-            var finals = Grammar.GetStart().Select(r => r.Final());
+            var finals = Grammar.GetStart().Select(r => r.Final()).Indexed();
             var gammas = _chart[_chart.Count - 1].FinalRules(Grammar.Start);
             gammas.IntersectWith(finals);
 
-            return BuildTreesHelper(null, gammas.First(), _chart.Count - 1);
-        }
-
-
-        private Node BuildTreesHelper(Node children, Rule rule, int chartIdx)
-        {
             throw new NotImplementedException();
         }
     }

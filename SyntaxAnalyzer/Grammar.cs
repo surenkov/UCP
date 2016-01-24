@@ -24,13 +24,11 @@ namespace SyntaxAnalyzer
         public void Add(string term, IEnumerable<Symbol> production) 
             => Add(new NonTerminal(term), production);
 
-        public List<Rule> GetRules(NonTerminal term, int index)
+        public List<Rule> GetRules(NonTerminal term)
         {
-            return _productions[term].Select(p => new Rule(term, p, index)).ToList();
+            return _productions[term].Select(p => new Rule(term, p)).ToList();
         }
 
-        public List<Rule> GetStart() => GetStart(0);
-
-        public List<Rule> GetStart(int index) => GetRules(Start, index);
+        public List<Rule> GetStart() => GetRules(Start);
     }
 }

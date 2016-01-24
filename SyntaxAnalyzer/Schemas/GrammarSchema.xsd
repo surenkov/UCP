@@ -10,7 +10,7 @@
         </xs:element>
         <xs:element maxOccurs="unbounded" name="rule">
           <xs:complexType>
-            <xs:attribute name="term" type="xs:string" use="required" />
+            <xs:attribute name="name" type="xs:string" use="required" />
             <xs:attribute name="production" type="xs:string" use="required" />
           </xs:complexType>
         </xs:element>

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Schema;
 using LexicalAnalyzer;
+using SyntaxAnalyzer.Earley;
 
 namespace SyntaxAnalyzer
 {
@@ -45,7 +46,7 @@ namespace SyntaxAnalyzer
         public void LoadGrammar(Stream stream)
         {
             var schemas = new XmlSchemaSet();
-            schemas.Add("http://savva.moe/compiler/rules.xsd", "Schemas/GrammarSchema.xsd");
+            schemas.Add("http://savva.moe/compiler/grammar.xsd", "Schemas/GrammarSchema.xsd");
             var rules = XmlReader.Create(stream, new XmlReaderSettings
             {
                 ValidationType = ValidationType.Schema,
@@ -69,7 +70,7 @@ namespace SyntaxAnalyzer
                         g.Start = new NonTerminal(start);
                         continue;
                     case "rule":
-                        term = rules.GetAttribute("term");
+                        term = rules.GetAttribute("name");
                         product = rules.GetAttribute("production");
                         break;
                     default:
@@ -111,11 +112,7 @@ namespace SyntaxAnalyzer
         /// </summary>
         /// <param name="tokens">Tokens sequence</param>
         /// <param name="parser">Custom parser</param>
-        /// <returns>AST' root</returns>
-        public Node Parse(IEnumerable<Token> tokens, AbstractParser parser)
-        {
-            parser.Parse(tokens);
-            return parser.BuildTree();
-        }
+        /// <returns>AST's root</returns>
+        public Node Parse(IEnumerable<Token> tokens, AbstractParser parser) => parser.Parse(tokens);
     }
 }

@@ -25,12 +25,7 @@ namespace SyntaxAnalyzer
         /// Parses input sequence
         /// </summary>
         /// <param name="tokens">Input tokens sequence</param>
-        public abstract void Parse(IEnumerable<Token> tokens);
-
-        /// <summary>
-        /// Builds AST for Parse() input
-        /// </summary>
         /// <returns>Node, which represents AST's root</returns>
-        public abstract Node BuildTree();
+        public abstract Node Parse(IEnumerable<Token> tokens);
     }
 }

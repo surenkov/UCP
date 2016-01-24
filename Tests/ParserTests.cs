@@ -1,4 +1,5 @@
-﻿using LexicalAnalyzer;
+﻿using System.Linq;
+using LexicalAnalyzer;
 using NUnit.Framework;
 using SyntaxAnalyzer;
 
@@ -20,8 +21,8 @@ namespace Tests
         [TestCase]
         public void BasicExpressionTest()
         {
-            _lexer.SetSource("(a + a) * a");
-            _parser.Parse(_lexer);
+            _lexer.SetSource("2 + 3 * 4");
+            _parser.Parse(_lexer.Where(t => t == null || t.Required));
         }
     }
 }

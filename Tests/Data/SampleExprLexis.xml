@@ -2,9 +2,6 @@
 <lexis xmlns="http://savva.moe/compiler/lexis.xsd">
   <token name="ws" expression="[\n\s\t]+" omit="true"/>
   <token name="integral" expression="([1-9]+[0-9]*)|(0[0-7]*)|(0[xX][0-9a-fA-F]+)" />
-  <token name="a" expression="a"/>
   <token name="+" expression="\+"/>
   <token name="*" expression="\*"/>
-  <token name="(" expression="\("/>
-  <token name=")" expression="\)"/>
 </lexis>

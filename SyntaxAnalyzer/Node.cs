@@ -17,17 +17,10 @@ namespace SyntaxAnalyzer
             _children = new List<Node>();
         }
 
-        public void AddChild(Node child)
+        public void Add(Node child)
         {
             _children.Add(child);
             child.Parent = this;
-        }
-
-        public void AddChildren(IEnumerable<Node> children)
-        {
-            var cList = children as List<Node> ?? children.ToList();
-            _children.AddRange(cList);
-            cList.ForEach(c => c.Parent = this);
         }
 
         public IEnumerator<Node> GetEnumerator() => _children.GetEnumerator();
