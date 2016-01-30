@@ -12,10 +12,11 @@ namespace Tests
     {
         private Lexer _lexer;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Init()
         {
-            _lexer = new Lexer("Data/GoLangLexis.xml");
+            System.IO.Directory.SetCurrentDirectory(TestContext.CurrentContext.TestDirectory);
+            _lexer = new Lexer("Data\\GoLangLexis.xml");
         }
 
         [TestCase("abc", "ab.c.")]
@@ -31,7 +32,7 @@ namespace Tests
         [TestCase("a\\||\\.b", "a\\|.\\.b.|")]
         public void RegexConverterTests(string re, string pos)
         {
-            Assert.AreEqual(pos, InfixToPostfix.Convert(re));
+            Assert.That(InfixToPostfix.Convert(re), Is.EqualTo(pos));
         }
 
         [TestCase("a", "a", false)]
@@ -63,12 +64,12 @@ namespace Tests
 
             if (!throws)
             {
-                Assert.DoesNotThrow(act);
-                Assert.IsTrue(a.Current.Final);
-                Assert.AreEqual(a.Name.First(), re);
+                Assert.That(act, Throws.Nothing);
+                Assert.That(a.Current.Final, Is.True);
+                Assert.That(a.Name.First(), Is.EqualTo(re));
             }
             else
-                Assert.Throws(typeof(StateNotFoundException), act);
+                Assert.That(act, Throws.TypeOf<StateNotFoundException>());
         }
 
         [TestCase("Data/GoLexisTests/NumbersTest.xml")]
@@ -78,23 +79,23 @@ namespace Tests
         public void LexerTestCases(string testPath)
         {
             var testCase = XDocument.Load(testPath).Root;
-            Assert.NotNull(testCase);
+            Assert.That(testCase, Is.Not.Null);
 
             var data = testCase.Element("data");
-            Assert.NotNull(data);
+            Assert.That(data, Is.Not.Null);
             _lexer.SetSource(data.Value);
 
             var result = testCase.Element("result");
             Assert.NotNull(result);
             foreach (var node in result.Elements("token"))
             {
-                Assert.True(_lexer.GetToken());
+                Assert.That(_lexer.GetToken(), Is.True);
                 Debug.WriteLine(_lexer.Token);
 
-                Assert.AreEqual(node.Attribute("value").Value, _lexer.Token.Value);
-                Assert.AreEqual(node.Attribute("type").Value, _lexer.Token.Type);
+                Assert.That(_lexer.Token.Value, Is.EqualTo(node.Attribute("value").Value));
+                Assert.That(_lexer.Token.Type, Is.EqualTo(node.Attribute("type").Value));
             }
-            Assert.False(_lexer.GetToken());
+            Assert.That(_lexer.GetToken, Is.False);
         }
 
         [Test]

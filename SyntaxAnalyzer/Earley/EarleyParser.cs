@@ -18,7 +18,7 @@ namespace SyntaxAnalyzer.Earley
         public override Node Parse(IEnumerable<Token> tokens)
         {
             _chart.Clear();
-            _chart.Add(new State(Grammar.GetStart().Select(r => new IndexedRule(r, 0))));
+            _chart.Add(new State(Grammar.GetStart().Indexed()));
 
             var enumerator = tokens.GetEnumerator();
             for (int i = 0; enumerator.MoveNext(); i++)
@@ -49,7 +49,7 @@ namespace SyntaxAnalyzer.Earley
 
         private void Predict(int chartIdx, int ruleIdx)
         {
-            var nextTerm = _chart[chartIdx][ruleIdx]?.NextTerm as NonTerminal;
+            var nextTerm = _chart[chartIdx][ruleIdx].NextTerm as NonTerminal;
             if (nextTerm == null)
                 throw new SyntaxException("Next predicted symbol is terminal");
 
@@ -96,12 +96,9 @@ namespace SyntaxAnalyzer.Earley
 
         private Node BuildTree()
         {
-            if (!_chart[_chart.Count - 1].ContainsFinal(Grammar.Start))
+            var gamma = _chart[_chart.Count - 1].FinalRules(Grammar.Start).FirstOrDefault();
+            if (gamma == null)
                 throw new SyntaxException("Input string doesn't belong to the grammar");
-
-            var finals = Grammar.GetStart().Select(r => r.Final()).Indexed();
-            var gammas = _chart[_chart.Count - 1].FinalRules(Grammar.Start);
-            gammas.IntersectWith(finals);
 
             throw new NotImplementedException();
         }

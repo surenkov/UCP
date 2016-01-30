@@ -11,11 +11,12 @@ namespace Tests
         private Lexer _lexer;
         private Parser _parser;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Init()
         {
-            _lexer = new Lexer("Data/SampleExprLexis.xml") { YieldEndOfSource = true };
-            _parser = new Parser("Data/SampleExprRules.xml");
+            System.IO.Directory.SetCurrentDirectory(TestContext.CurrentContext.TestDirectory);
+            _lexer = new Lexer("Data\\SampleExprLexis.xml") { YieldEndOfSource = true };
+            _parser = new Parser("Data\\SampleExprRules.xml");
         }
 
         [TestCase]
