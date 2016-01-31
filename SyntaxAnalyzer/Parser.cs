@@ -46,7 +46,8 @@ namespace SyntaxAnalyzer
         public void LoadGrammar(Stream stream)
         {
             var schemas = new XmlSchemaSet();
-            schemas.Add("http://savva.moe/compiler/grammar.xsd", "Schemas/GrammarSchema.xsd");
+            string pwd = AppDomain.CurrentDomain.BaseDirectory;
+            schemas.Add("http://savva.moe/compiler/grammar.xsd", pwd + "\\Schemas\\GrammarSchema.xsd");
             var rules = XmlReader.Create(stream, new XmlReaderSettings
             {
                 ValidationType = ValidationType.Schema,
