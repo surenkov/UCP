@@ -49,7 +49,8 @@
     <Compile Include="Parser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Earley\State.cs" />
-    <Compile Include="Utility.cs" />
+    <Compile Include="Rule.cs" />
+    <Compile Include="Symbol.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LexicalAnalyzer\LexicalAnalyzer.csproj">

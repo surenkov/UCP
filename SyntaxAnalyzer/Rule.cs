@@ -1,47 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using LexicalAnalyzer;
 
 namespace SyntaxAnalyzer
 {
-    public abstract class Symbol
-    {
-        public string Term { get; }
-
-        protected Symbol(string term)
-        {
-            Term = term;
-        }
-
-        public override string ToString() => Term;
-
-        public override bool Equals(object obj)
-        {
-            var sym = obj as Symbol;
-            return sym != null && sym.Term.Equals(Term);
-        }
-
-        public override int GetHashCode() => Term.GetHashCode();
-    }
-
-    public class Terminal : Symbol
-    {
-        public Token Token { get; set; }
-
-        public Terminal(string term)
-            : base(term)
-        {
-        }
-    }
-
-    public class NonTerminal : Symbol
-    {
-        public NonTerminal(string term)
-            : base(term)
-        {
-        }
-    }
-
     public class Rule
     {
         protected readonly int Dot;

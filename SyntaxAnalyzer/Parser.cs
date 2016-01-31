@@ -114,6 +114,11 @@ namespace SyntaxAnalyzer
         /// <param name="tokens">Tokens sequence</param>
         /// <param name="parser">Custom parser</param>
         /// <returns>AST's root</returns>
-        public Node Parse(IEnumerable<Token> tokens, AbstractParser parser) => parser.Parse(tokens);
+        public Node Parse(IEnumerable<Token> tokens, AbstractParser parser)
+        {
+            if (parser == null)
+                throw new ArgumentNullException(nameof(parser));
+            return parser.Parse(tokens);
+        }
     }
 }

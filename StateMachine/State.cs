@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace StateMachine
 {
@@ -48,5 +50,51 @@ namespace StateMachine
         public override string ToString() => $"[State: Start={Start}, Final={Final}, Id={Id}]";
 
         object ICloneable.Clone() => Clone();
+    }
+
+    public class States : HashSet<State>
+    {
+        private int _hash;
+
+        public States()
+        {
+        }
+
+        public States(IEnumerable<State> collection) 
+            : base(collection)
+        {
+        }
+        
+        public States ReHash()
+        {
+            unchecked
+            {
+                int hash = 0;
+                foreach (var state in this)
+                {
+                    hash += state.GetHashCode();
+                    hash += (hash << 10);
+                    hash ^= (hash >> 6);
+                }
+                hash += (hash << 3);
+                hash ^= (hash >> 11);
+                _hash = hash + (hash << 15);
+            }
+            return this;
+        }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as States;
+            if (other == null || other.Count != Count || other._hash != _hash)
+                return false;
+            return other.All(Contains);
+        }
+
+        public override int GetHashCode() => _hash;
+    }
+
+    public class StateNotFoundException : KeyNotFoundException
+    {
     }
 }

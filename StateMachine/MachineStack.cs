@@ -51,7 +51,7 @@ namespace StateMachine
         }
 
         /// <summary>
-        /// Parallel concatenation
+        /// Parallel unification
         /// </summary>
         public void Unite()
         {
