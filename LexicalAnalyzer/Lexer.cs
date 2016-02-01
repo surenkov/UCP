@@ -25,6 +25,10 @@ namespace LexicalAnalyzer
 
         public Token Token { get; private set; }
 
+        /// <summary>
+        /// <para>Sets lexer to produce null-token after the end of source.</para>
+        /// <remarks>Useful for some parsing algorithms</remarks>
+        /// </summary>
         public bool YieldEndOfSource { get; set; }
 
         public Lexer()
