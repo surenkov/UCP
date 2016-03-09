@@ -2,9 +2,10 @@
 <grammar xmlns="http://savva.moe/compiler/grammar.xsd">
   <start rule="P"/>
   <rule name="P" production="S"/>
-  <rule name="S" production="S $+ M"/>
+  <rule name="S" production="S $plus M"/>
   <rule name="S" production="M"/>
-  <rule name="M" production="M $* T"/>
+  <rule name="M" production="M $mul T"/>
   <rule name="M" production="T"/>
-  <rule name="T" production="$integral"/>
+  <rule name="T" production="$int"/>
+  <rule name="T" production="$op_par S $cl_par"/>
 </grammar>

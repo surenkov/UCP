@@ -3,6 +3,7 @@ using System.Linq;
 using System.Xml.Linq;
 using NUnit.Framework;
 using LexicalAnalyzer;
+using LexicalAnalyzer.Regex;
 using StateMachine;
 
 namespace Tests

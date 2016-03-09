@@ -2,7 +2,7 @@
 using System.IO;
 using StateMachine;
 
-namespace LexicalAnalyzer
+namespace LexicalAnalyzer.Regex
 {
     public class RegexBuilder
     {

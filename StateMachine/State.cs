@@ -73,11 +73,11 @@ namespace StateMachine
                 foreach (var state in this)
                 {
                     hash += state.GetHashCode();
-                    hash += (hash << 10);
-                    hash ^= (hash >> 6);
+                    hash += hash << 10;
+                    hash ^= hash >> 6;
                 }
-                hash += (hash << 3);
-                hash ^= (hash >> 11);
+                hash += hash << 3;
+                hash ^= hash >> 11;
                 _hash = hash + (hash << 15);
             }
             return this;

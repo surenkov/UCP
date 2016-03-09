@@ -1,7 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <lexis xmlns="http://savva.moe/compiler/lexis.xsd">
   <token name="ws" expression="[\n\s\t]+" omit="true"/>
-  <token name="integral" expression="([1-9]+[0-9]*)|(0[0-7]*)|(0[xX][0-9a-fA-F]+)" />
-  <token name="+" expression="\+"/>
-  <token name="*" expression="\*"/>
+  <token name="int" expression="([1-9]+[0-9]*)|(0[0-7]*)|(0[xX][0-9a-fA-F]+)" />
+  <token name="plus" expression="\+"/>
+  <token name="mul" expression="\*"/>
+  <token name="op_par" expression="\("/>
+  <token name="cl_par" expression="\)"/>
 </lexis>

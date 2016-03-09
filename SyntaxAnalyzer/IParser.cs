@@ -1,31 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using LexicalAnalyzer;
+using SyntaxAnalyzer.AST;
 
 namespace SyntaxAnalyzer
 {
     public class SyntaxException : Exception
     {
+        public SyntaxException()
+        {
+        }
+
         public SyntaxException(string message)
             : base(message)
         {
         }
     }
 
-    public abstract class AbstractParser
+    public interface IParser
     {
-        protected readonly Grammar Grammar;
-
-        protected AbstractParser(Grammar grammar)
-        {
-            Grammar = grammar;
-        }
-
         /// <summary>
         /// Parses input sequence
         /// </summary>
+        /// <param name="grammar">Language grammar</param>
         /// <param name="tokens">Input tokens sequence</param>
         /// <returns>Node, which represents AST's root</returns>
-        public abstract Node Parse(IEnumerable<Token> tokens);
+        /// <exception cref="SyntaxException" />
+        Node Parse(Grammar.Grammar grammar, IEnumerable<Token> tokens);
     }
 }

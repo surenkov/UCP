@@ -1,7 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using LexicalAnalyzer;
 using NUnit.Framework;
 using SyntaxAnalyzer;
+using SyntaxAnalyzer.AST;
 
 namespace Tests
 {
@@ -19,11 +21,22 @@ namespace Tests
             _parser = new Parser("Data\\SampleExprRules.xml");
         }
 
-        [TestCase]
+        [Test]
         public void BasicExpressionTest()
         {
-            _lexer.SetSource("2 + 3 * 4");
-            _parser.Parse(_lexer.Where(t => t == null || t.Required));
+            _lexer.SetSource("2 + 3 * 0x1F");
+            PrintTree(_parser.Parse(_lexer.Where(t => t == null || t.Required)));
+        }
+
+        private void PrintTree(Node root, int tab = 0)
+        {
+            foreach (var item in root.Reverse())
+            {
+                for (int i = 0; i < tab; i++)
+                    Console.Out.Write('\t');
+                Console.Out.WriteLine(item);
+                PrintTree(item, tab + 1);
+            }
         }
     }
 }

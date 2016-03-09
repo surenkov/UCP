@@ -1,40 +1,41 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using SyntaxAnalyzer.Grammar;
 
 namespace SyntaxAnalyzer.Earley
 {
-    using IndexedRuleSet = HashSet<IndexedRule>;
+    using ItemSet = HashSet<EarleyRule>;
 
     class State : IEnumerable<Rule>
     {
-        private readonly Dictionary<NonTerminal, IndexedRuleSet> _rulesByName;
+        private readonly Dictionary<NonTerminal, ItemSet> _rulesByName;
 
-        private readonly Dictionary<Symbol, IndexedRuleSet> _rulesByNextTerm;
+        private readonly Dictionary<Symbol, ItemSet> _rulesByNextTerm;
 
-        private readonly Dictionary<NonTerminal, IndexedRuleSet> _finalRules;
+        private readonly Dictionary<NonTerminal, ItemSet> _finalRules;
 
-        private readonly List<IndexedRule> _orderedRules;
+        private readonly List<EarleyRule> _orderedRules;
 
-        public IndexedRule this[int index] => _orderedRules[index];
+        public EarleyRule this[int index] => _orderedRules[index];
 
         public int Count => _orderedRules.Count;
 
         public State()
         {
-            _rulesByName = new Dictionary<NonTerminal, IndexedRuleSet>(1);
-            _rulesByNextTerm = new Dictionary<Symbol, IndexedRuleSet>(1);
-            _finalRules = new Dictionary<NonTerminal, IndexedRuleSet>();
-            _orderedRules = new List<IndexedRule>(1);
+            _rulesByName = new Dictionary<NonTerminal, ItemSet>(1);
+            _rulesByNextTerm = new Dictionary<Symbol, ItemSet>(1);
+            _finalRules = new Dictionary<NonTerminal, ItemSet>();
+            _orderedRules = new List<EarleyRule>(1);
         }
 
-        public State(IEnumerable<IndexedRule> rules)
+        public State(IEnumerable<EarleyRule> rules)
             : this()
         {
             foreach (var rule in rules)
                 Add(rule);
         }
 
-        public bool Contains(IndexedRule rule)
+        public bool Contains(EarleyRule rule)
         {
             var name = rule.Name;
             return _rulesByName.ContainsKey(name) && _rulesByName[name].Contains(rule);
@@ -46,20 +47,20 @@ namespace SyntaxAnalyzer.Earley
 
         public bool ContainsFinal(NonTerminal term) => _finalRules.ContainsKey(term);
 
-        public IndexedRuleSet RulesByName(NonTerminal term) => GetRulesFromDictionary(_rulesByName, term);
+        public ItemSet RulesByName(NonTerminal term) => GetRulesFromDictionary(_rulesByName, term);
 
-        public IndexedRuleSet RulesByNextTerm(Symbol term) => GetRulesFromDictionary(_rulesByNextTerm, term);
+        public ItemSet RulesByNextTerm(Symbol term) => GetRulesFromDictionary(_rulesByNextTerm, term);
 
-        public IndexedRuleSet FinalRules(NonTerminal name) => GetRulesFromDictionary(_finalRules, name);
+        public ItemSet FinalRules(NonTerminal name) => GetRulesFromDictionary(_finalRules, name);
 
-        private static IndexedRuleSet GetRulesFromDictionary<T>(Dictionary<T, IndexedRuleSet> dict, T term)
+        private static ItemSet GetRulesFromDictionary<T>(Dictionary<T, ItemSet> dict, T term)
         {
-            IndexedRuleSet rules;
+            ItemSet rules;
             dict.TryGetValue(term, out rules);
-            return rules != null ? new IndexedRuleSet(rules) : new IndexedRuleSet();
+            return rules != null ? new ItemSet(rules) : new ItemSet();
         }
 
-        public void Add(IndexedRule rule)
+        public void Add(EarleyRule rule)
         {
             if (Contains(rule))
                 return;
@@ -69,19 +70,19 @@ namespace SyntaxAnalyzer.Earley
 
             _orderedRules.Add(rule);
             if (!_rulesByName.ContainsKey(name))
-                _rulesByName.Add(name, new IndexedRuleSet());
+                _rulesByName.Add(name, new ItemSet());
             _rulesByName[name].Add(rule);
 
             if (next != null)
             {
                 if (!_rulesByNextTerm.ContainsKey(next))
-                    _rulesByNextTerm.Add(next, new IndexedRuleSet());
+                    _rulesByNextTerm.Add(next, new ItemSet());
                 _rulesByNextTerm[next].Add(rule);
             }
             else
             {
                 if (!_finalRules.ContainsKey(name))
-                    _finalRules.Add(name, new IndexedRuleSet());
+                    _finalRules.Add(name, new ItemSet());
                 _finalRules[name].Add(rule);
             }
         }

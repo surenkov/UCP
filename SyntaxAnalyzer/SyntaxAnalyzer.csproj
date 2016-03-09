@@ -42,15 +42,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Earley\EarleyParser.cs" />
-    <Compile Include="Earley\IndexedRule.cs" />
-    <Compile Include="Grammar.cs" />
-    <Compile Include="Node.cs" />
-    <Compile Include="AbstractParser.cs" />
+    <Compile Include="Earley\EarleyRule.cs" />
+    <Compile Include="Grammar\Grammar.cs" />
+    <Compile Include="AST\Node.cs" />
+    <Compile Include="IParser.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Earley\State.cs" />
-    <Compile Include="Rule.cs" />
-    <Compile Include="Symbol.cs" />
+    <Compile Include="Grammar\Rule.cs" />
+    <Compile Include="Grammar\Symbol.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LexicalAnalyzer\LexicalAnalyzer.csproj">

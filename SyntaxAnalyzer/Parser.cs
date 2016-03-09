@@ -5,7 +5,9 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Schema;
 using LexicalAnalyzer;
+using SyntaxAnalyzer.AST;
 using SyntaxAnalyzer.Earley;
+using SyntaxAnalyzer.Grammar;
 
 namespace SyntaxAnalyzer
 {
@@ -22,7 +24,7 @@ namespace SyntaxAnalyzer
     /// </summary>
     public class Parser
     {
-        public Grammar Grammar { get; private set; }
+        public Grammar.Grammar Grammar { get; private set; }
 
         public Parser()
         {
@@ -54,7 +56,7 @@ namespace SyntaxAnalyzer
                 Schemas = schemas
             });
 
-            var g = new Grammar();
+            var g = new Grammar.Grammar();
             while (rules.Read())
             {
                 if (!rules.IsStartElement()) continue;
@@ -82,7 +84,7 @@ namespace SyntaxAnalyzer
                     throw new ParserException("Rule's term cannot be empty");
 
                 if (string.IsNullOrWhiteSpace(product))
-                    throw new NotImplementedException("Epsilon-rules are yet implemented");
+                    throw new NotImplementedException("Epsilon-rules aren't yet implemented");
 
                 var production = product
                     .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
@@ -99,12 +101,17 @@ namespace SyntaxAnalyzer
             Grammar = g;
         }
 
+        /// <summary>
+        /// Builds AST from tokens squence, using internal Earley parser
+        /// </summary>
+        /// <param name="tokens">Tokens sequence</param>
+        /// <returns>AST's root</returns>
+        /// <exception cref="ArgumentNullException" />
+        /// <exception cref="SyntaxException" />
+        /// <exception cref="ParserException" />
         public Node Parse(IEnumerable<Token> tokens)
         {
-            if (Grammar == null)
-                throw new ParserException("Grammar must be loaded before calling Parse() method");
-
-            var parser = new EarleyParser(Grammar);
+            var parser = new EarleyParser();
             return Parse(tokens, parser);
         }
 
@@ -114,11 +121,18 @@ namespace SyntaxAnalyzer
         /// <param name="tokens">Tokens sequence</param>
         /// <param name="parser">Custom parser</param>
         /// <returns>AST's root</returns>
-        public Node Parse(IEnumerable<Token> tokens, AbstractParser parser)
+        /// <exception cref="ArgumentNullException" />
+        /// <exception cref="SyntaxException" />
+        /// <exception cref="ParserException" />
+        public Node Parse(IEnumerable<Token> tokens, IParser parser)
         {
+            if (Grammar == null)
+                throw new ParserException("Grammar must be loaded before calling Parse() method");
+
             if (parser == null)
                 throw new ArgumentNullException(nameof(parser));
-            return parser.Parse(tokens);
+
+            return parser.Parse(Grammar, tokens);
         }
     }
 }

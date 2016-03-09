@@ -1,16 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using SyntaxAnalyzer.Grammar;
 
-namespace SyntaxAnalyzer
+namespace SyntaxAnalyzer.AST
 {
     public class Node : IEnumerable<Node>
     {
         private readonly List<Node> _children;
 
         public Symbol Symbol { get; set; }
-
-        public Node Parent { get; set; }
 
         public Node()
         {
@@ -20,8 +18,9 @@ namespace SyntaxAnalyzer
         public void Add(Node child)
         {
             _children.Add(child);
-            child.Parent = this;
         }
+
+        public override string ToString() => Symbol.ToString();
 
         public IEnumerator<Node> GetEnumerator() => _children.GetEnumerator();
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StateMachine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -6,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Schema;
-using StateMachine;
+using LexicalAnalyzer.Regex;
 
 namespace LexicalAnalyzer
 {
@@ -53,7 +54,7 @@ namespace LexicalAnalyzer
         /// Loads lexis and builds recognize automaton
         /// </summary>
         /// <param name="path">Lexis specification</param>
-        /// <param name="dfa">Flag, which specifies automaton type: 
+        /// <param name="dfa">Flag, which specifies automaton type:
         /// deterministic or non-deterministic.
         /// DFA's building is significantly slower (creates up to 2^n of NFA states),
         /// but recognizes much faster (O(n) instead of O(n*m), where n - token's length)</param>
@@ -88,6 +89,7 @@ namespace LexicalAnalyzer
                         precedence = lexis.GetAttribute("precedence");
                         canBeOmitted = lexis.GetAttribute("omit");
                         break;
+
                     default:
                         throw new XmlException($"Lexis definition cannot contain '{lexis.Name}' element");
                 }
@@ -134,18 +136,19 @@ namespace LexicalAnalyzer
                 return false;
 
             var token = new StringBuilder();
+            uint column = _column;
             try
             {
                 while (_stream.Peek() != -1)
                 {
-                    char c = (char)_stream.Peek();
+                    char c = (char) _stream.Peek();
                     _machine.Trigger(c);
                     token.Append(c);
                     _stream.Read();
-                    _column++;
+                    column++;
                     if (c != '\n') continue;
                     _line++;
-                    _column = 1;
+                    column = 1;
                 }
             }
             catch (StateNotFoundException e)
@@ -154,6 +157,7 @@ namespace LexicalAnalyzer
                     UnknownToken($"Unknown token: <{token}>, Ln: {_line} Col: {_column}", e);
 
                 SetToken(token.ToString());
+                _column = column;
                 return _stream.Peek() != -1;
             }
 

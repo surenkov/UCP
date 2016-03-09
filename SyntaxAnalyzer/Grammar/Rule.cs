@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace SyntaxAnalyzer
+namespace SyntaxAnalyzer.Grammar
 {
+    /// <summary>
+    /// An LR(0) rule representation
+    /// </summary>
     public class Rule
     {
-        protected readonly int Dot;
+        public readonly int Dot;
 
         public readonly NonTerminal Name;
 
@@ -16,6 +19,8 @@ namespace SyntaxAnalyzer
         public bool IsFinal => Dot >= Production.Count;
 
         public List<Symbol> Production { get; }
+
+        public Symbol this[int index] => Production[index];
 
         protected Rule(NonTerminal name, List<Symbol> production, int dot)
         {
@@ -45,7 +50,8 @@ namespace SyntaxAnalyzer
             return rule != null
                    && rule.Dot.Equals(Dot)
                    && rule.Name.Equals(Name)
-                   && rule.Production.Equals(Production);
+                   && rule.Production.Count.Equals(Production.Count)
+                   && rule.Production.Zip(Production, (s1, s2) => s1 == s2).All(b => b);
         }
 
         public override int GetHashCode()

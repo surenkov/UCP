@@ -1,6 +1,6 @@
 ﻿using LexicalAnalyzer;
 
-namespace SyntaxAnalyzer
+namespace SyntaxAnalyzer.Grammar
 {
     public abstract class Symbol
     {
@@ -29,6 +29,11 @@ namespace SyntaxAnalyzer
         public Terminal(string term)
             : base(term)
         {
+        }
+
+        public override string ToString()
+        {
+            return $"{Term}: {Token.Value}";
         }
     }
 
