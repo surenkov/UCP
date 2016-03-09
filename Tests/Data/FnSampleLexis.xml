@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<lexis xmlns="http://savva.moe/compiler/lexis.xsd">
+  <token name="ws" expression="[\n\t\s]+" omit="true"/>
+  <token name="type" expression="int|void" precedence="1"/>
+  <token name="identifier" expression="[A-Za-z]+[A-Za-z0-9]*" />
+  <token name="," expression=","/>
+
+  <token name="(" expression="\("/>
+  <token name=")" expression="\)"/>
+
+  <token name="{" expression="{"/>
+  <token name="}" expression="}"/>
+</lexis>

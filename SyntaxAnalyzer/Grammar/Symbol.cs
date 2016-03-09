@@ -33,7 +33,7 @@ namespace SyntaxAnalyzer.Grammar
 
         public override string ToString()
         {
-            return $"{Term}: {Token.Value}";
+            return Token != null ? $"{Term}: {Token.Value}" : Term;
         }
     }
 

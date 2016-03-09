@@ -48,6 +48,16 @@ namespace SyntaxAnalyzer.Earley
         public Terminal ScannedAt(int index) => _scanned[index];
 
         public override string ToString() => base.ToString() + $", {Start}";
+
+        public override int GetHashCode() => base.GetHashCode();
+
+        public override bool Equals(object obj)
+        {
+            var rule = obj as EarleyRule;
+            return rule != null
+                   && Start.Equals(rule.Start)
+                   && base.Equals(rule);
+        }
     }
 
     static class EarleyEnumerable

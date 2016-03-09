@@ -17,14 +17,14 @@ namespace Tests
         public void Init()
         {
             System.IO.Directory.SetCurrentDirectory(TestContext.CurrentContext.TestDirectory);
-            _lexer = new Lexer("Data\\SampleExprLexis.xml") { YieldEndOfSource = true };
-            _parser = new Parser("Data\\SampleExprRules.xml");
+            _lexer = new Lexer("Data\\FnSampleLexis.xml") { YieldEndOfSource = true };
+            _parser = new Parser("Data\\FnSampleGrammar.xml");
         }
 
-        [Test]
+        [TestCase]
         public void BasicExpressionTest()
         {
-            _lexer.SetSource("(2 + 3 * 1000) * 0x1F");
+            _lexer.SetSource("void main(int argc, int argv, int aa) {}");
             PrintTree(_parser.Parse(_lexer.Where(t => t == null || t.Required)));
         }
 

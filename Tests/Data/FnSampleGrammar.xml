@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<grammar xmlns="http://savva.moe/compiler/grammar.xsd">
+  <start rule="P"/>
+  <rule name="P" production="S"/>
+  <rule name="S" production="ENTITY PARENS"/>
+  <rule name="PARENS" production="$( PARAMS $) ${ $}"/>
+  <rule name="PARENS" production="$( $) ${ $}"/>
+  <rule name="PARAMS" production="PARAM $, PARAMS"/>
+  <rule name="PARAMS" production="PARAM"/>
+  <rule name="PARAM" production="ENTITY"/>
+  <rule name="ENTITY" production="$type $identifier"/>
+</grammar>

@@ -29,12 +29,20 @@ namespace SyntaxAnalyzer.Earley
                     for (int j = 0; j < rules.Count; j++)
                     {
                         if (!rules[j].IsFinal)
+                        {
                             if (rules[j].NextTerm.GetType() == typeof (NonTerminal))
+                            {
                                 Predict(grammar, i, j);
+                            }
                             else
+                            {
                                 Scan(enumerator.Current, i, j);
+                            }
+                        }
                         else
+                        {
                             Complete(i, j);
+                        }
                     }
                 }
             }
