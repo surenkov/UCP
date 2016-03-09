@@ -24,7 +24,7 @@ namespace Tests
         [Test]
         public void BasicExpressionTest()
         {
-            _lexer.SetSource("2 + 3 * 0x1F");
+            _lexer.SetSource("(2 + 3 * 1000) * 0x1F");
             PrintTree(_parser.Parse(_lexer.Where(t => t == null || t.Required)));
         }
 

@@ -10,6 +10,8 @@ namespace SyntaxAnalyzer.AST
 
         public Symbol Symbol { get; set; }
 
+        public Node Next { get; set; }
+
         public Node()
         {
             _children = new List<Node>();
@@ -22,7 +24,12 @@ namespace SyntaxAnalyzer.AST
 
         public override string ToString() => Symbol.ToString();
 
-        public IEnumerator<Node> GetEnumerator() => _children.GetEnumerator();
+        public IEnumerator<Node> GetEnumerator()
+        {
+            if (Next != null)
+                throw new ParserException("Ambigious grammar, multiple derivations had been found");
+            return _children.GetEnumerator();
+        }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }

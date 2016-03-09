@@ -103,11 +103,22 @@ namespace SyntaxAnalyzer.Earley
                 var matchedTerm = rule[matchedIdx] as NonTerminal;
                 if (matchedTerm != null)
                 {
-                    var prevs = _chart[stateIdx].FinalRules(matchedTerm);
-                    var prev = prevs.First(r => _chart[r.Start].Contains(rule.WithDot(matchedIdx)));
+                    int idx = matchedIdx;
+                    var derivatives = _chart[stateIdx]
+                        .FinalRules(matchedTerm)
+                        .Where(r => _chart[r.Start].Contains(rule.WithDot(idx)));
 
-                    node.Add(BuildTree(prev, stateIdx));
-                    stateIdx = prev.Start;
+                    var rules = derivatives as IList<EarleyRule> ?? derivatives.ToList();
+                    var first = BuildTree(rules.First(), stateIdx);
+                    var next = first;
+                    foreach (var deriv in rules.Skip(1))
+                    {
+                        next.Next = BuildTree(deriv, stateIdx);
+                        next = next.Next;
+                    }
+
+                    node.Add(first);
+                    stateIdx = rules[0].Start;
                 }
                 else
                 {
