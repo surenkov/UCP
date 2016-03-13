@@ -16,8 +16,10 @@ namespace LexicalAnalyzer.Regex
             EscapeDictionary = new Dictionary<char, char>
             {
                 { 'n', '\n' },
+                { 'r', '\r' },
                 { '\\', '\\' },
                 { 't', '\t' },
+                { 'v', '\v' },
                 { 's', ' ' }
             };
         }
