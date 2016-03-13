@@ -1,0 +1,8 @@
+language: csharp
+solution: UCP.sln
+install:
+  - nuget restore UCP.sln
+  - nuget install NUnit.ConsoleRunner -Version 3.2.0 -OutputDirectory testrunner
+script:
+  - xbuild /p:Configuration=Release /tv:12.0 /p:TargetFrameworkVersion=v4.5 UCP.sln
+  - mono ./testrunner/NUnit.ConsoleRunner.3.2.0/tools/nunit3-console.exe ./Tests/bin/Release/Tests.dll
