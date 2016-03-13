@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.IO;
+using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
 using NUnit.Framework;
@@ -16,8 +17,8 @@ namespace Tests
         [OneTimeSetUp]
         public void Init()
         {
-            System.IO.Directory.SetCurrentDirectory(TestContext.CurrentContext.TestDirectory);
-            _lexer = new Lexer("Data\\GoLangLexis.xml");
+            Directory.SetCurrentDirectory(TestContext.CurrentContext.TestDirectory);
+            _lexer = new Lexer(Path.Combine("Data", "GoLangLexis.xml"));
         }
 
         [TestCase("abc", "ab.c.")]

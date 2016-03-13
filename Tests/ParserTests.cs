@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using LexicalAnalyzer;
 using NUnit.Framework;
@@ -17,8 +18,8 @@ namespace Tests
         public void Init()
         {
             System.IO.Directory.SetCurrentDirectory(TestContext.CurrentContext.TestDirectory);
-            _lexer = new Lexer("Data\\FnSampleLexis.xml") { YieldEndOfSource = true };
-            _parser = new Parser("Data\\FnSampleGrammar.xml");
+            _lexer = new Lexer(Path.Combine("Data", "FnSampleLexis.xml")) { YieldEndOfSource = true };
+            _parser = new Parser(Path.Combine("Data", "FnSampleGrammar.xml"));
         }
 
         [TestCase]

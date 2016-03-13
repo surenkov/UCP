@@ -67,7 +67,7 @@ namespace LexicalAnalyzer
         {
             var schemas = new XmlSchemaSet();
             string pwd = AppDomain.CurrentDomain.BaseDirectory;
-            schemas.Add("http://savva.moe/compiler/lexis.xsd", pwd + "\\Schemas\\LexisSchema.xsd");
+            schemas.Add("http://savva.moe/compiler/lexis.xsd", Path.Combine(pwd, "Schemas", "LexisSchema.xsd"));
             var lexis = XmlReader.Create(stream, new XmlReaderSettings
             {
                 ValidationType = ValidationType.Schema,
