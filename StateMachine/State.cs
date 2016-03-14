@@ -65,20 +65,25 @@ namespace StateMachine
         {
         }
         
+        /// <summary>
+        /// Jenkins's one-at-a-time hash function
+        /// </summary>
+        /// <remarks>https://en.wikipedia.org/wiki/Jenkins_hash_function</remarks>
+        /// <returns>This object</returns>
         public States ReHash()
         {
             unchecked
             {
-                int hash = 0;
+                ulong hash = 0;
                 foreach (var state in this)
                 {
-                    hash += state.GetHashCode();
+                    hash += state.Id;
                     hash += hash << 10;
                     hash ^= hash >> 6;
                 }
                 hash += hash << 3;
                 hash ^= hash >> 11;
-                _hash = hash + (hash << 15);
+                _hash = (int) (hash + (hash << 15));
             }
             return this;
         }
