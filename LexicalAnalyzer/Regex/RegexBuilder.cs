@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using StateMachine;
+using StateMachine.Automata;
+using StateMachine.Utility;
 
 namespace LexicalAnalyzer.Regex
 {

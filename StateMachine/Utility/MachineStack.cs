@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using StateMachine.Automata;
 
-namespace StateMachine
+namespace StateMachine.Utility
 {
     public class MachineStack<TEvent>
+        where TEvent : IEquatable<TEvent>
     {
         private readonly Stack<NFA<TEvent>> _stack;
 

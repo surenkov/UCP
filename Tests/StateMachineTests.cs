@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using StateMachine;
+using StateMachine.Automata;
 
 namespace Tests
 {

@@ -1,108 +1,15 @@
-﻿using System.Linq;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using StateMachine.Utility;
 
-namespace StateMachine
+namespace StateMachine.Automata
 {
-    /// <summary>
-    /// Abstract state machine
-    /// </summary>
-    public abstract class Automaton<TEvent>
-    {
-        protected State StartState;
-        protected readonly States States;
-        protected readonly HashSet<TEvent> Events;
-        protected readonly Dictionary<ulong, string> Names;
-
-        public State Start
-        {
-            get { return StartState; }
-            private set
-            {
-                States.Add(StartState = value);
-                StartState.Start = true;
-            }
-        }
-
-        public State LastAdded { get; protected set; }
-
-        public abstract bool IsFinal { get; }
-
-        public abstract string[] Name { get; }
-
-        protected Automaton()
-        {
-            States = new States();
-            Events = new HashSet<TEvent>();
-            Names = new Dictionary<ulong, string>();
-
-            States.Add(LastAdded = Start = new State());
-        }
-
-        public virtual void AddTransition(State from, State to, TEvent e)
-        {
-            if (!States.Contains(from))
-                throw new StateNotFoundException();
-
-            if (States.Add(to))
-                LastAdded = to;
-            Events.Add(e);
-        }
-
-        public void SetName(State st, string name)
-        {
-            if (!States.Contains(st))
-                throw new StateNotFoundException();
-            Names[st.Id] = name;
-        }
-
-        public abstract void Trigger(TEvent e);
-
-        public abstract void Initial();
-    }
-
-    /// <summary>
-    /// Deterministic finite-state machine
-    /// </summary>
-    public class DFA<TEvent> : Automaton<TEvent>
-    {
-        private readonly Dictionary<KeyValuePair<State, TEvent>, State> _table;
-
-        public State Current { get; private set; }
-
-        public override string[] Name => Names[Current.Id].Split(';');
-
-        public override bool IsFinal => Current.Final;
-
-        public DFA()
-        {
-            _table = new Dictionary<KeyValuePair<State, TEvent>, State>();
-            Current = StartState;
-        }
-
-        public override void AddTransition(State from, State to, TEvent e)
-        {
-            base.AddTransition(from, to, e);
-            _table[new KeyValuePair<State, TEvent>(from, e)] = to;
-        }
-
-        public override void Trigger(TEvent e)
-        {
-            var key = new KeyValuePair<State, TEvent>(Current, e);
-            if (!_table.ContainsKey(key))
-                throw new StateNotFoundException();
-            Current = _table[key];
-        }
-
-        public override void Initial()
-        {
-            Current = Start;
-        }
-    }
-
     /// <summary>
     /// Non-deterministic finite-state machine
     /// </summary>
     public class NFA<TEvent> : Automaton<TEvent>
+        where TEvent : IEquatable<TEvent>
     {
         private readonly Dictionary<KeyValuePair<State, TEvent>, States> _table;
         private readonly Dictionary<State, States> _epsClosures;
@@ -114,7 +21,7 @@ namespace StateMachine
             
         public NFA()
         {
-            _table = new Dictionary<KeyValuePair<State, TEvent>, States>();
+            _table = new Dictionary<KeyValuePair<State, TEvent>, States>(new StateEventPairEqualityComparer<TEvent>());
             _epsClosures = new Dictionary<State, States> { { StartState, new States { StartState } } };
         }
 

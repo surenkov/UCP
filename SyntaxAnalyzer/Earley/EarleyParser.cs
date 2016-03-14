@@ -50,9 +50,9 @@ namespace SyntaxAnalyzer.Earley
 
         private void SyntaxError(Token found = null)
         {
-            var expected = _chart[_chart.Count - 1].Where(r => r.NextTerm.GetType() == typeof (Terminal))
-                                                   .Select(r => r.NextTerm as Terminal)
-                                                   .ToList();
+            var expected = new HashSet<Terminal>(
+                _chart[_chart.Count - 1].Where(r => r.NextTerm?.GetType() == typeof (Terminal))
+                                        .Select(r => r.NextTerm as Terminal));
             throw new SequenceSyntaxException { Actual = found, Expected = expected };
         }
 

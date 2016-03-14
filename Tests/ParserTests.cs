@@ -17,16 +17,34 @@ namespace Tests
         [OneTimeSetUp]
         public void Init()
         {
-            System.IO.Directory.SetCurrentDirectory(TestContext.CurrentContext.TestDirectory);
+            Directory.SetCurrentDirectory(TestContext.CurrentContext.TestDirectory);
             _lexer = new Lexer(Path.Combine("Data", "FnSampleLexis.xml")) { YieldEndOfSource = true };
             _parser = new Parser(Path.Combine("Data", "FnSampleGrammar.xml"));
         }
 
-        [TestCase]
+        [Test]
         public void BasicExpressionTest()
         {
-            _lexer.SetSource("void main(int argc, int argv, int aa) {}");
+            _lexer.SetSource("void main() {}");
+            _parser.Parse(_lexer.Omit());
+
+            _lexer.SetSource("void main(int argc, int argv) {}");
             PrintTree(_parser.Parse(_lexer.Omit()));
+
+            _lexer.SetSource("");
+            Assert.Throws<SequenceSyntaxException>(() => _parser.Parse(_lexer.Omit()));
+
+            _lexer.SetSource("void main");
+            Assert.Throws<SequenceSyntaxException>(() => _parser.Parse(_lexer.Omit()));
+
+            _lexer.SetSource("void main ( {}");
+            Assert.Throws<SequenceSyntaxException>(() => _parser.Parse(_lexer.Omit()));
+
+            _lexer.SetSource("void main (int, int a) {}");
+            Assert.Throws<SequenceSyntaxException>(() => _parser.Parse(_lexer.Omit()));
+
+            _lexer.SetSource("void main (int a int b) {}");
+            Assert.Throws<SequenceSyntaxException>(() => _parser.Parse(_lexer.Omit()));
         }
 
         private void PrintTree(Node root, int tab = 0)
