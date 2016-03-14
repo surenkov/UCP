@@ -26,7 +26,7 @@ namespace Tests
         public void BasicExpressionTest()
         {
             _lexer.SetSource("void main(int argc, int argv, int aa) {}");
-            PrintTree(_parser.Parse(_lexer.Where(t => t == null || t.Required)));
+            PrintTree(_parser.Parse(_lexer.Omit()));
         }
 
         private void PrintTree(Node root, int tab = 0)

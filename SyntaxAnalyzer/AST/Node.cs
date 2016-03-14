@@ -22,7 +22,7 @@ namespace SyntaxAnalyzer.AST
             _children.Add(child);
         }
 
-        public override string ToString() => Symbol.ToString();
+        public override string ToString() => (Symbol as Terminal)?.Token.ToString() ?? Symbol.ToString();
 
         public IEnumerator<Node> GetEnumerator()
         {

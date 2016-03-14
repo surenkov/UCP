@@ -23,10 +23,11 @@ namespace SyntaxAnalyzer.Earley
 
             using (var enumerator = tokens.GetEnumerator())
             {
+                var token = enumerator.Current;
                 for (int i = 0; enumerator.MoveNext(); i++)
                 {
-                    if (i >= _chart.Count)
-                        SyntaxError(enumerator.Current);
+                    if (i >= _chart.Count) SyntaxError(token);
+                    token = enumerator.Current;
                     var rules = _chart[i];
                     for (int j = 0; j < rules.Count; j++)
                     {
@@ -34,7 +35,7 @@ namespace SyntaxAnalyzer.Earley
                             if (rules[j].NextTerm.GetType() == typeof (NonTerminal))
                                 Predict(grammar, i, j);
                             else
-                                Scan(enumerator.Current, i, j);
+                                Scan(token, i, j);
                         else
                             Complete(i, j);
                     }

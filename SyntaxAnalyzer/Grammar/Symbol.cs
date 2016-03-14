@@ -30,8 +30,6 @@ namespace SyntaxAnalyzer.Grammar
             : base(term)
         {
         }
-
-        public override string ToString() => Token.ToString();
     }
 
     public class NonTerminal : Symbol
