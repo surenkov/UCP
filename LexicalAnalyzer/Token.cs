@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace LexicalAnalyzer
 {
@@ -39,6 +41,14 @@ namespace LexicalAnalyzer
         public override string ToString()
         {
             return $"[Ln {Line}, Col {Column}] <{Type}>: <{Value}>";
+        }
+    }
+
+    public static class TokenEnumerable
+    {
+        public static IEnumerable<Token> Omit(this IEnumerable<Token> tokens)
+        {
+            return tokens.Where(t => t == null || t.Required);
         }
     }
 }
