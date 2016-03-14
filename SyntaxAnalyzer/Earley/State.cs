@@ -6,7 +6,7 @@ namespace SyntaxAnalyzer.Earley
 {
     using ItemSet = HashSet<EarleyRule>;
 
-    class State : IEnumerable<Rule>
+    class State : IEnumerable<EarleyRule>
     {
         private readonly Dictionary<NonTerminal, ItemSet> _rulesByName;
 
@@ -87,7 +87,7 @@ namespace SyntaxAnalyzer.Earley
             }
         }
 
-        public IEnumerator<Rule> GetEnumerator() => _orderedRules.GetEnumerator();
+        public IEnumerator<EarleyRule> GetEnumerator() => _orderedRules.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }

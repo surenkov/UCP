@@ -12,9 +12,17 @@ namespace SyntaxAnalyzer.Grammar
 
         public readonly NonTerminal Name;
 
-        public Symbol NextTerm => Dot < Production.Count ? Production[Dot] : null;
+        public Symbol NextTerm
+        {
+            get { return Dot < Production.Count ? Production[Dot] : null; }
+            set { Production[Dot] = value; }
+        }
 
-        public Symbol MatchedTerm => Dot > 0 ? Production[Dot - 1] : null;
+        public Symbol MatchedTerm
+        {
+            get { return Dot > 0 ? Production[Dot - 1] : null; }
+            set { Production[Dot - 1] = value; }
+        }
 
         public bool IsFinal => Dot >= Production.Count;
 
@@ -49,8 +57,8 @@ namespace SyntaxAnalyzer.Grammar
             var rule = obj as Rule;
             return rule != null
                    && rule.Dot.Equals(Dot)
-                   && rule.Name.Equals(Name)
                    && rule.Production.Count.Equals(Production.Count)
+                   && rule.Name.Equals(Name)
                    && rule.Production.Zip(Production, (s1, s2) => s1 == s2).All(b => b);
         }
 

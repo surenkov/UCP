@@ -25,30 +25,34 @@ namespace SyntaxAnalyzer.Earley
             {
                 for (int i = 0; enumerator.MoveNext(); i++)
                 {
+                    if (i >= _chart.Count)
+                        SyntaxError(enumerator.Current);
                     var rules = _chart[i];
                     for (int j = 0; j < rules.Count; j++)
                     {
                         if (!rules[j].IsFinal)
-                        {
                             if (rules[j].NextTerm.GetType() == typeof (NonTerminal))
-                            {
                                 Predict(grammar, i, j);
-                            }
                             else
-                            {
                                 Scan(enumerator.Current, i, j);
-                            }
-                        }
                         else
-                        {
                             Complete(i, j);
-                        }
                     }
                 }
             }
 
             int n = _chart.Count - 1;
-            return BuildTree(_chart[n].FinalRules(grammar.Start).First(), n);
+            var complete = _chart[n].FinalRules(grammar.Start).FirstOrDefault();
+            if (complete == null) SyntaxError();
+            return BuildTree(complete, n);
+        }
+
+        private void SyntaxError(Token found = null)
+        {
+            var expected = _chart[_chart.Count - 1].Where(r => r.NextTerm.GetType() == typeof (Terminal))
+                                                   .Select(r => r.NextTerm as Terminal)
+                                                   .ToList();
+            throw new SequenceSyntaxException { Actual = found, Expected = expected };
         }
 
         private void Predict(Grammar grammar, int chartIdx, int ruleIdx)
@@ -76,7 +80,7 @@ namespace SyntaxAnalyzer.Earley
             if (terminal == null)
                 throw new SyntaxException("Next symbol to scan is non-terminal");
 
-            nextRule.Scanned = new Terminal(terminal.Term) { Token = token };
+            nextRule.MatchedTerm = new Terminal(terminal.Term) { Token = token };
 
             if (_chart.Count <= chartIdx + 1)
                 _chart.Add(new State());
@@ -117,20 +121,19 @@ namespace SyntaxAnalyzer.Earley
                         .Where(r => _chart[r.Start].Contains(rule.WithDot(idx)));
 
                     var rules = derivatives as IList<EarleyRule> ?? derivatives.ToList();
-                    var first = BuildTree(rules.First(), stateIdx);
-                    var next = first;
+                    var child = BuildTree(rules.First(), stateIdx);
+                    node.Add(child);
                     foreach (var deriv in rules.Skip(1))
                     {
-                        next.Next = BuildTree(deriv, stateIdx);
-                        next = next.Next;
+                        child.Next = BuildTree(deriv, stateIdx);
+                        child = child.Next;
                     }
 
-                    node.Add(first);
                     stateIdx = rules[0].Start;
                 }
                 else
                 {
-                    node.Add(new Node { Symbol = rule.ScannedAt(matchedIdx) });
+                    node.Add(new Node { Symbol = rule[matchedIdx] });
                     stateIdx--;
                 }
                 matchedIdx--;

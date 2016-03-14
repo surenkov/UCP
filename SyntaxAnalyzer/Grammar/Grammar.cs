@@ -26,7 +26,7 @@ namespace SyntaxAnalyzer.Grammar
 
         public List<Rule> GetRules(NonTerminal term)
         {
-            return _productions[term].Select(p => new Rule(term, p)).ToList();
+            return _productions[term].Select(p => new Rule(term, new List<Symbol>(p))).ToList();
         }
 
         public List<Rule> GetStart() => GetRules(Start);

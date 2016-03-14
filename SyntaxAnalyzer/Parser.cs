@@ -107,8 +107,9 @@ namespace SyntaxAnalyzer
         /// <param name="tokens">Tokens sequence</param>
         /// <returns>AST's root</returns>
         /// <exception cref="ArgumentNullException" />
-        /// <exception cref="SyntaxException" />
         /// <exception cref="ParserException" />
+        /// <exception cref="SequenceSyntaxException" />
+        /// <exception cref="SyntaxException" />
         public Node Parse(IEnumerable<Token> tokens)
         {
             var parser = new EarleyParser();
@@ -122,8 +123,9 @@ namespace SyntaxAnalyzer
         /// <param name="parser">Custom parser</param>
         /// <returns>AST's root</returns>
         /// <exception cref="ArgumentNullException" />
-        /// <exception cref="SyntaxException" />
         /// <exception cref="ParserException" />
+        /// <exception cref="SequenceSyntaxException" />
+        /// <exception cref="SyntaxException" />
         public Node Parse(IEnumerable<Token> tokens, IParser parser)
         {
             if (Grammar == null)

@@ -24,17 +24,14 @@ namespace SyntaxAnalyzer.Grammar
 
     public class Terminal : Symbol
     {
-        public Token Token { get; set; }
+        public Token Token { get; internal set; }
 
         public Terminal(string term)
             : base(term)
         {
         }
 
-        public override string ToString()
-        {
-            return Token != null ? $"{Term}: {Token.Value}" : Term;
-        }
+        public override string ToString() => Token.ToString();
     }
 
     public class NonTerminal : Symbol
