@@ -1,23 +1,33 @@
 using System;
 using System.Collections.Generic;
+using StateMachine.States;
 
 namespace StateMachine.Automata
 {
     /// <summary>
-    /// Abstract state machine
+    ///     Abstract state machine.
     /// </summary>
     public abstract class Automaton<TEvent>
         where TEvent : IEquatable<TEvent>
     {
-        protected State StartState;
-        protected readonly States States;
         protected readonly HashSet<TEvent> Events;
         protected readonly Dictionary<ulong, string> Names;
+        protected readonly StateSet States;
+        protected State StartState;
+
+        protected Automaton()
+        {
+            States = new StateSet();
+            Events = new HashSet<TEvent>();
+            Names = new Dictionary<ulong, string>();
+
+            LastAdded = Start = new State();
+        }
 
         public State Start
         {
             get { return StartState; }
-            private set
+            set
             {
                 States.Add(StartState = value);
                 StartState.Start = true;
@@ -30,18 +40,9 @@ namespace StateMachine.Automata
 
         public abstract string[] Name { get; }
 
-        protected Automaton()
+        public virtual void AddTransition(State @from, State to, TEvent e)
         {
-            States = new States();
-            Events = new HashSet<TEvent>();
-            Names = new Dictionary<ulong, string>();
-
-            States.Add(LastAdded = Start = new State());
-        }
-
-        public virtual void AddTransition(State from, State to, TEvent e)
-        {
-            if (!States.Contains(from))
+            if (!States.Contains(@from))
                 throw new StateNotFoundException();
 
             if (States.Add(to))

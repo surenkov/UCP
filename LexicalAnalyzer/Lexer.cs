@@ -1,5 +1,4 @@
-﻿using StateMachine;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +8,7 @@ using System.Xml;
 using System.Xml.Schema;
 using LexicalAnalyzer.Regex;
 using StateMachine.Automata;
+using StateMachine.States;
 
 namespace LexicalAnalyzer
 {
@@ -52,19 +52,29 @@ namespace LexicalAnalyzer
         }
 
         /// <summary>
-        /// Loads lexis and builds recognize automaton
+        /// Loads lexis from specified file and builds recognizing automaton
         /// </summary>
-        /// <param name="path">Lexis specification</param>
-        /// <param name="dfa">Flag, which specifies automaton type:
-        /// deterministic or non-deterministic.
-        /// DFA's building is significantly slower (creates up to 2^n of NFA states),
-        /// but recognizes much faster (O(n) instead of O(n*m), where n - token's length)</param>
-        public void LoadLexis(string path, bool dfa)
+        /// <param name="path">Lexis specification file path</param>
+        /// <param name="deterministic">See description of the same parameter of <see cref="LoadLexis(Stream, bool)"/></param>
+        public void LoadLexis(string path, bool deterministic = false)
         {
-            LoadLexis(new FileStream(path, FileMode.Open), dfa);
+            LoadLexis(new FileStream(path, FileMode.Open), deterministic);
         }
 
-        public void LoadLexis(Stream stream, bool dfa)
+        /// <summary>
+        /// Loads lexis from stream and builds recognizing automaton
+        /// </summary>
+        /// <param name="stream">
+        ///     <para>Lexis specification stream</para>
+        ///     <remarks>See schema at Schemas\LexisSchema.xsd</remarks>
+        /// </param>
+        /// <param name="deterministic">
+        ///     <para>Flag, which specifies automaton type:
+        /// 	deterministic or non-deterministic.</para>
+        /// 	<remarks>DFA's building is significantly slower (creates up to 2^n of NFA states),
+        /// 	but recognizes much faster (O(n) instead of O(n*m), where n - token's length)</remarks>
+        /// </param>
+        public void LoadLexis(Stream stream, bool deterministic = false)
         {
             var schemas = new XmlSchemaSet();
             string pwd = AppDomain.CurrentDomain.BaseDirectory;
@@ -74,7 +84,7 @@ namespace LexicalAnalyzer
                 ValidationType = ValidationType.Schema,
                 Schemas = schemas
             });
-            var builder = new RegexBuilder();
+            var builder = new RegexEngine();
             while (lexis.Read())
             {
                 if (!lexis.IsStartElement()) continue;
@@ -107,11 +117,7 @@ namespace LexicalAnalyzer
                 bool.TryParse(canBeOmitted, out omit);
                 _required[name] = !omit;
             }
-            builder.Build();
-            if (dfa)
-                _machine = builder.Machine.ToDFA();
-            else
-                _machine = builder.Machine;
+            _machine = deterministic ? (Automaton<char>) builder.Build().ToDFA() : builder.Build();
             _machine.Initial();
         }
 

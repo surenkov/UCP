@@ -38,7 +38,7 @@
     <Compile Include="Lexer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Regex\InfixToPostfix.cs" />
-    <Compile Include="Regex\RegexBuilder.cs" />
+    <Compile Include="Regex\RegexEngine.cs" />
     <Compile Include="Token.cs" />
   </ItemGroup>
   <ItemGroup>

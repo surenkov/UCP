@@ -5,7 +5,7 @@ using System.Xml.Linq;
 using NUnit.Framework;
 using LexicalAnalyzer;
 using LexicalAnalyzer.Regex;
-using StateMachine;
+using StateMachine.States;
 
 namespace Tests
 {
@@ -58,9 +58,9 @@ namespace Tests
         [TestCase("private|public|protected", "virtual", true)]
         public void RegexBuilderTests(string re, string input, bool throws)
         {
-            var builder = new RegexBuilder();
+            var builder = new RegexEngine();
             builder.AddExpression(re, re);
-            var a = builder.Machine.ToDFA();
+            var a = builder.Build().ToDFA();
 
             TestDelegate act = () => input.ToList().ForEach(c => a.Trigger(c));
 

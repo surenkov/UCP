@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace StateMachine.Utility
+namespace StateMachine.States
 {
     internal class StateEventPairEqualityComparer<T> : IEqualityComparer<KeyValuePair<State, T>>
         where T : IEquatable<T>

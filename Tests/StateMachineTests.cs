@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
-using StateMachine;
 using StateMachine.Automata;
+using StateMachine.States;
 
 namespace Tests
 {
@@ -33,32 +33,32 @@ namespace Tests
         [Test]
         public void StatesEqualityTests()
         {
-            var s1 = new States
+            var s1 = new StateSet
             {
                 new State(1),
                 new State(2),
                 new State(438783),
                 new State(4),
                 new State(10010),
-            }.ReHash();
+            };
 
-            var s2 = new States
+            var s2 = new StateSet
             {
                 new State(1),
                 new State(2),
                 new State(438783),
                 new State(4),
                 new State(10010),
-            }.ReHash();
+            };
 
-            var s3 = new States
+            var s3 = new StateSet
             {
                 new State(1),
                 new State(2),
                 new State(438783),
                 new State(5),
                 new State(10010),
-            }.ReHash();
+            };
 
             Assert.That(s1.GetHashCode(), Is.EqualTo(s2.GetHashCode()));
             Assert.That(s1, Is.EqualTo(s2));

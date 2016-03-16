@@ -1,22 +1,16 @@
 using System;
 using System.Collections.Generic;
-using StateMachine.Utility;
+using StateMachine.States;
 
 namespace StateMachine.Automata
 {
     /// <summary>
-    /// Deterministic finite-state machine
+    ///     Deterministic finite-state machine.
     /// </summary>
     public class DFA<TEvent> : Automaton<TEvent>
         where TEvent : IEquatable<TEvent>
     {
         private readonly Dictionary<KeyValuePair<State, TEvent>, State> _table;
-
-        public State Current { get; private set; }
-
-        public override string[] Name => Names[Current.Id].Split(';');
-
-        public override bool IsFinal => Current.Final;
 
         public DFA()
         {
@@ -24,10 +18,16 @@ namespace StateMachine.Automata
             Current = StartState;
         }
 
-        public override void AddTransition(State from, State to, TEvent e)
+        public State Current { get; private set; }
+
+        public override string[] Name => Names[Current.Id].Split(';');
+
+        public override bool IsFinal => Current.Final;
+
+        public override void AddTransition(State @from, State to, TEvent e)
         {
-            base.AddTransition(from, to, e);
-            _table[new KeyValuePair<State, TEvent>(from, e)] = to;
+            base.AddTransition(@from, to, e);
+            _table[new KeyValuePair<State, TEvent>(@from, e)] = to;
         }
 
         public override void Trigger(TEvent e)
