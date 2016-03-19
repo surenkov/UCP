@@ -1,9 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace StateMachine.States
 {
+    [Serializable]
     public class StateSet : IEnumerable<State>
     {
         private readonly HashSet<State> _states;

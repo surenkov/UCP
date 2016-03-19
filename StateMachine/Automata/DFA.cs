@@ -7,6 +7,7 @@ namespace StateMachine.Automata
     /// <summary>
     ///     Deterministic finite-state machine.
     /// </summary>
+    [Serializable]
     public class DFA<TEvent> : Automaton<TEvent>
         where TEvent : IEquatable<TEvent>
     {

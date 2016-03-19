@@ -7,6 +7,7 @@ namespace StateMachine.Automata
     /// <summary>
     ///     Abstract state machine.
     /// </summary>
+    [Serializable]
     public abstract class Automaton<TEvent>
         where TEvent : IEquatable<TEvent>
     {

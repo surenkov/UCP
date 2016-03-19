@@ -8,6 +8,7 @@ namespace StateMachine.Automata
     /// <summary>
     ///     Non-deterministic finite-state machine.
     /// </summary>
+    [Serializable]
     public class NFA<TEvent> : Automaton<TEvent>
         where TEvent : IEquatable<TEvent>
     {
@@ -120,9 +121,7 @@ namespace StateMachine.Automata
                     q.Enqueue(next);
 
                     var finals = next.Where(s => s.Final).ToArray();
-                    var name = string.Join(";", finals
-                                                    .Where(s => Names.ContainsKey(s.Id))
-                                                    .Select(s => Names[s.Id]));
+                    var name = string.Join(";", finals.Where(s => Names.ContainsKey(s.Id)).Select(s => Names[s.Id]));
                     var newState = map.ContainsKey(next)
                         ? map[next]
                         : new State
